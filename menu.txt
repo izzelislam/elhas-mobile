@@ -1,0 +1,27 @@
+-athentikasi
+
+- dashboard
+- santri
+- Akademik
+  - absensi
+  - jadwal
+  - nilai
+  - rapor
+  - kalender pendidikan
+- kesantrian
+  - prestasi
+  - pelanggaran
+  - izin
+  - catatan
+- Asrana
+- Tahfidz
+  - halaqoh
+  - setoran
+  - ringkasan
+- mutabaah
+  - mutabaah santri
+  - mutabaah asatidzah
+- keuangan
+  - tabungan (riwayat, transaksi dll)
+  - spp
+- informasi
