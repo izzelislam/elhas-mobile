@@ -1,4 +1,5 @@
 const {hairlineWidth} = require('nativewind/theme');
+const tokens = require('./src/theme/tokens');
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
@@ -7,7 +8,16 @@ module.exports = {
   presets: [require('nativewind/preset')],
   theme: {
     extend: {
+      fontFamily: tokens.fontFamily,
+      fontSize: tokens.fontSize,
       colors: {
+        brand: tokens.colors.brand,
+        surface: tokens.colors.surface,
+        canvas: tokens.colors.canvas,
+        line: tokens.colors.line,
+        field: tokens.colors.field,
+        ink: tokens.colors.text,
+        tint: tokens.colors.tint,
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
@@ -21,7 +31,7 @@ module.exports = {
         popover: {DEFAULT: 'hsl(var(--popover))', foreground: 'hsl(var(--popover-foreground))'},
         card: {DEFAULT: 'hsl(var(--card))', foreground: 'hsl(var(--card-foreground))'},
       },
-      borderRadius: {lg: 'var(--radius)', md: 'calc(var(--radius) - 2px)', sm: 'calc(var(--radius) - 4px)'},
+      borderRadius: {...tokens.radius, lg: 'var(--radius)', md: 'calc(var(--radius) - 2px)', sm: 'calc(var(--radius) - 4px)'},
       borderWidth: {hairline: hairlineWidth()},
     },
   },

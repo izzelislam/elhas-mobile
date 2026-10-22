@@ -1,7 +1,7 @@
 import axios, {AxiosError} from 'axios';
 import {useAuthStore} from '@/store/auth.store';
 
-export const API_BASE_URL = 'https://api.example.com'; // TODO: pindah ke config env
+export const API_BASE_URL = 'https://elhas.otakatikin.com/api/v1';
 
 export const http = axios.create({
   baseURL: API_BASE_URL,
