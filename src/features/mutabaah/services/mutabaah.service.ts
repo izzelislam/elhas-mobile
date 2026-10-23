@@ -1,6 +1,9 @@
 import {http} from '@/services/api/client';
 import type {DetailSantriResponse, IndikatorResponse, RekapResponse} from '../types';
 
+/** Santri dan asatidzah memakai bentuk API yang sama, hanya beda prefix endpoint. */
+export type MutabaahVariant = 'santri' | 'asatidzah';
+
 export type RekapParams = {
   santri_id?: number;
   bulan?: string; // YYYY-MM
@@ -8,29 +11,38 @@ export type RekapParams = {
   tanggal_selesai?: string; // YYYY-MM-DD
 };
 
-export async function getRekapSantri(params: RekapParams = {}) {
-  const {data} = await http.get<RekapResponse>('/mutabaah/santri/rekap', {params});
+export async function getRekap(variant: MutabaahVariant, params: RekapParams = {}) {
+  const {data} = await http.get<RekapResponse>(`/mutabaah/${variant}/rekap`, {params});
   return data.data;
 }
 
-/** Indikator penilaian mutabaah santri; dipakai oleh form input. */
-export async function getIndikatorSantri() {
-  const {data} = await http.get<IndikatorResponse>('/mutabaah/santri/indikator');
+/** Indikator penilaian mutabaah; dipakai oleh form input. */
+export async function getIndikator(variant: MutabaahVariant) {
+  const {data} = await http.get<IndikatorResponse>(`/mutabaah/${variant}/indikator`);
   return data.data;
 }
 
 export type CreateMutabaahPayload = {
   tanggal: string; // YYYY-MM-DD
-  subjek_id: number; // id santri
+  subjek_id?: number; // id santri; tidak dikirim untuk asatidzah
   items: {indikator_id: number; dikerjakan: boolean; catatan: string | null}[];
 };
 
-export async function createMutabaahSantri(payload: CreateMutabaahPayload) {
-  const {data} = await http.post<{success: boolean; message: string}>('/mutabaah/santri', payload);
+export async function createMutabaah(variant: MutabaahVariant, payload: CreateMutabaahPayload) {
+  const {data} = await http.post<{success: boolean; message: string}>(
+    `/mutabaah/${variant}`,
+    payload,
+  );
   return data;
 }
 
-export async function getDetailSantri(id: number, params: Omit<RekapParams, 'santri_id'> = {}) {
-  const {data} = await http.get<DetailSantriResponse>(`/mutabaah/santri/subjek/${id}`, {params});
+export async function getDetail(
+  variant: MutabaahVariant,
+  id: number,
+  params: Pick<RekapParams, 'bulan'> = {},
+) {
+  const {data} = await http.get<DetailSantriResponse>(`/mutabaah/${variant}/subjek/${id}`, {
+    params,
+  });
   return data.data;
 }

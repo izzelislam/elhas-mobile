@@ -13,7 +13,12 @@
   - pelanggaran
   - izin
   - catatan
+  - konseling
+  - dispensasi
 - Asrana
+  - gedung
+  - kamar
+  - penghuni
 - Tahfidz
   - halaqoh
   - setoran
@@ -23,5 +28,7 @@
   - mutabaah asatidzah
 - keuangan
   - tabungan (riwayat, transaksi dll)
-  - spp
+  - setor / tarik tabungan
+  - tagihan
+- aduan
 - informasi

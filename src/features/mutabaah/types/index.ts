@@ -1,7 +1,7 @@
 export type RekapSantri = {
   id: number;
   nama: string;
-  nomor_induk: string;
+  nomor_induk: string | null;
   dikerjakan: number;
   tidak_dikerjakan: number;
   total: number;
@@ -39,8 +39,9 @@ export type KegiatanMutabaah = {
 };
 
 export type DetailSantri = {
-  subjek: {id: number; nama: string; nomor_induk: string};
+  subjek: {id: number; nama: string; nomor_induk: string | null};
   periode: {tanggal_mulai: string; tanggal_selesai: string};
+  ringkasan: {dikerjakan: number; tidak_dikerjakan: number; total: number; persentase: number};
   kegiatan: KegiatanMutabaah[];
 };
 

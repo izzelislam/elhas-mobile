@@ -1,7 +1,6 @@
 import React, {useState} from 'react';
 import {
   KeyboardAvoidingView,
-  Platform,
   Pressable,
   ScrollView,
   Text,
@@ -101,7 +100,7 @@ export default function IzinFormScreen({
   return (
     <KeyboardAvoidingView
       className="flex-1 bg-canvas"
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      behavior="padding">
       <View style={{paddingTop: insets.top + 24}} className="bg-brand px-5 pb-5">
         <View className="flex-row items-center">
           <Pressable onPress={onBack} hitSlop={10}>

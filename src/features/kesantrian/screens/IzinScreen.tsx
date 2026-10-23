@@ -16,7 +16,7 @@ import {
   IzinFilter,
   IzinFilterSheet,
 } from '../components/IzinFilterSheet';
-import {approveIzin, getIzinList, rejectIzin} from '../services/izin.service';
+import {approveIzin, getIzinList, kembaliIzin, rejectIzin} from '../services/izin.service';
 import type {Izin} from '../types';
 
 const PER_PAGE = 15;
@@ -40,12 +40,14 @@ function IzinItem({
   busy,
   onApprove,
   onReject,
+  onKembali,
 }: {
   item: Izin;
   canAct: boolean;
   busy: boolean;
   onApprove: () => void;
   onReject: () => void;
+  onKembali: () => void;
 }) {
   const c = statusColor(item.status.value);
   return (
@@ -79,6 +81,12 @@ function IzinItem({
           </Text>
         </View>
       </View>
+      {item.tanggal_kembali_aktual ? (
+        <Text className="mt-3 text-caption text-ink-muted">
+          Kembali pada {dateShort(item.tanggal_kembali_aktual)},{' '}
+          {timeShort(item.tanggal_kembali_aktual)}
+        </Text>
+      ) : null}
       {item.alasan_penolakan ? (
         <Text className="mt-3 text-caption text-destructive">{item.alasan_penolakan}</Text>
       ) : null}
@@ -90,6 +98,17 @@ function IzinItem({
           <View className="flex-1">
             <Button title="Setujui" loading={busy} disabled={busy} onPress={onApprove} />
           </View>
+        </View>
+      ) : null}
+      {canAct && item.status.value === 'disetujui' && !item.tanggal_kembali_aktual ? (
+        <View className="mt-3">
+          <Button
+            title="Tandai sudah kembali"
+            variant="outline"
+            loading={busy}
+            disabled={busy}
+            onPress={onKembali}
+          />
         </View>
       ) : null}
     </Card>
@@ -184,6 +203,25 @@ export default function IzinScreen({
           load(1);
         } catch (err) {
           toast.error(errorMessage(err, 'Gagal menyetujui izin'));
+        } finally {
+          setActingId(null);
+        }
+      },
+    });
+
+  const kembali = (item: Izin) =>
+    dialog.confirm({
+      title: 'Santri sudah kembali?',
+      message: `${item.santri?.nama_lengkap ?? 'Santri'} akan ditandai sudah kembali ke pesantren.`,
+      confirmText: 'Sudah kembali',
+      onConfirm: async () => {
+        setActingId(item.id);
+        try {
+          const res = await kembaliIzin(item.id);
+          toast.success(res.message || 'Santri ditandai sudah kembali');
+          load(1);
+        } catch (err) {
+          toast.error(errorMessage(err, 'Gagal menandai kembali'));
         } finally {
           setActingId(null);
         }
@@ -300,6 +338,7 @@ export default function IzinScreen({
               canAct={canAct}
               busy={actingId === item.id}
               onApprove={() => approve(item)}
+              onKembali={() => kembali(item)}
               onReject={() => {
                 setAlasan('');
                 setRejectTarget(item);

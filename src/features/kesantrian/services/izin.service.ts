@@ -38,3 +38,9 @@ export async function rejectIzin(id: number, alasan?: string) {
   );
   return data;
 }
+
+/** Menandai santri sudah kembali; hanya untuk izin yang sudah disetujui. */
+export async function kembaliIzin(id: number) {
+  const {data} = await http.post<{success: boolean; message: string}>(`/izin/${id}/kembali`);
+  return data;
+}

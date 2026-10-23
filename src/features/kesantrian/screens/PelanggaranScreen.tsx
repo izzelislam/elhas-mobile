@@ -73,7 +73,7 @@ export default function PelanggaranScreen({
 }: {
   onBack: () => void;
   onSelect: (item: Pelanggaran) => void;
-  onCreate: (jenisOptions: {id: number; nama: string}[]) => void;
+  onCreate: () => void;
 }) {
   const insets = useSafeAreaInsets();
   const [items, setItems] = useState<Pelanggaran[]>([]);
@@ -276,7 +276,7 @@ export default function PelanggaranScreen({
         />
       )}
       <Pressable
-        onPress={() => onCreate(sortedJenis)}
+        onPress={onCreate}
         style={{bottom: insets.bottom + 20}}
         className="absolute right-5 h-14 w-14 items-center justify-center rounded-full bg-brand shadow-lg active:opacity-80"
         accessibilityLabel="Catat pelanggaran">

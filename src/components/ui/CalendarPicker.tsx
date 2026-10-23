@@ -6,15 +6,18 @@ import {colors} from '@/theme';
 const WEEK = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
 
 const pad = (n: number) => String(n).padStart(2, '0');
-const toKey = (y: number, m: number, d: number) => `${y}-${pad(m + 1)}-${pad(d)}`;
+const toKey = (y: number, m: number, d: number) =>
+  `${y}-${pad(m + 1)}-${pad(d)}`;
 
 type Props = {
   /** Format YYYY-MM-DD */
   value: string | null;
   onChange: (value: string) => void;
+  /** Format YYYY-MM-DD; tanggal setelahnya dinonaktifkan. */
+  maxDate?: string;
 };
 
-export function CalendarPicker({value, onChange}: Props) {
+export function CalendarPicker({value, onChange, maxDate}: Props) {
   const initial = value ? new Date(value + 'T00:00:00') : new Date();
   const [year, setYear] = useState(initial.getFullYear());
   const [month, setMonth] = useState(initial.getMonth());
@@ -34,9 +37,15 @@ export function CalendarPicker({value, onChange}: Props) {
   while (cells.length % 7) {
     cells.push(null);
   }
-  const rows = Array.from({length: cells.length / 7}, (_, i) => cells.slice(i * 7, i * 7 + 7));
+  const rows = Array.from({length: cells.length / 7}, (_, i) =>
+    cells.slice(i * 7, i * 7 + 7),
+  );
   const today = new Date();
-  const todayKey = toKey(today.getFullYear(), today.getMonth(), today.getDate());
+  const todayKey = toKey(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate(),
+  );
   const title = new Date(year, month, 1).toLocaleDateString('id-ID', {
     month: 'long',
     year: 'numeric',
@@ -55,7 +64,10 @@ export function CalendarPicker({value, onChange}: Props) {
       </View>
       <View className="flex-row">
         {WEEK.map(w => (
-          <Text key={w} className="flex-1 py-1 text-center text-caption text-ink-muted">
+          <Text
+            key={w}
+            className="flex-1 py-1 text-center text-caption text-ink-muted"
+          >
             {w}
           </Text>
         ))}
@@ -68,19 +80,32 @@ export function CalendarPicker({value, onChange}: Props) {
             }
             const key = toKey(year, month, d);
             const active = key === value;
+            const disabled = !!maxDate && key > maxDate;
             return (
               <Pressable
                 key={j}
                 onPress={() => onChange(key)}
-                className="h-10 flex-1 items-center justify-center">
+                disabled={disabled}
+                className="h-10 flex-1 items-center justify-center"
+              >
                 <View
                   className={`h-9 w-9 items-center justify-center rounded-full ${
-                    active ? 'bg-brand' : key === todayKey ? 'bg-brand-light' : ''
-                  }`}>
+                    active
+                      ? 'bg-brand'
+                      : key === todayKey
+                      ? 'bg-brand-light'
+                      : ''
+                  }`}
+                >
                   <Text
                     className={`text-label ${
-                      active ? 'font-semibold text-brand-foreground' : 'text-ink'
-                    }`}>
+                      active
+                        ? 'font-semibold text-brand-foreground'
+                        : disabled
+                        ? 'text-ink-muted opacity-40'
+                        : 'text-ink'
+                    }`}
+                  >
                     {d}
                   </Text>
                 </View>

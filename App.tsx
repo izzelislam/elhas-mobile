@@ -6,8 +6,25 @@ import {PortalHost} from '@rn-primitives/portal';
 import {CircleUser, CircleHelp, Home, Receipt} from 'lucide-react-native';
 import {DashboardScreen} from '@/features/dashboard/screens';
 import {SantriDetailScreen, SantriListScreen} from '@/features/santri/screens';
-import {KalenderScreen} from '@/features/akademik/screens';
-import {CatatanScreen, IzinFormScreen, IzinScreen, PelanggaranDetailScreen, PelanggaranFormScreen, PelanggaranScreen, PrestasiDetailScreen, PrestasiScreen} from '@/features/kesantrian/screens';
+import {
+  AbsensiScreen,
+  JadwalScreen,
+  KalenderScreen,
+  NilaiScreen,
+  RaporScreen,
+} from '@/features/akademik/screens';
+import {
+  CatatanScreen,
+  IzinFormScreen,
+  DispensasiScreen,
+  IzinScreen,
+  KonselingScreen,
+  PelanggaranDetailScreen,
+  PelanggaranFormScreen,
+  PelanggaranScreen,
+  PrestasiDetailScreen,
+  PrestasiScreen,
+} from '@/features/kesantrian/screens';
 import {
   HalaqahDetailScreen,
   HalaqahScreen,
@@ -22,16 +39,33 @@ import {
   MutabaahSantriFormScreen,
   MutabaahSantriScreen,
 } from '@/features/mutabaah/screens';
+import {
+  TagihanScreen,
+  TarikTabunganScreen,
+  TabunganScreen,
+} from '@/features/keuangan/screens';
+import {AduanScreen} from '@/features/aduan/screens';
+import {InformasiScreen} from '@/features/informasi/screens';
 import {AkunScreen} from '@/features/akun/screens';
-import {LoginScreen, OnboardingScreen, SplashScreen} from '@/features/auth/screens';
+import {
+  LoginScreen,
+  OnboardingScreen,
+  SplashScreen,
+} from '@/features/auth/screens';
 import {getMe} from '@/features/auth/services/auth.service';
 import type {RekapSantri} from '@/features/mutabaah/types';
-import type {RekapParams} from '@/features/mutabaah/services/mutabaahSantri.service';
+import type {RekapParams} from '@/features/mutabaah/services/mutabaah.service';
 import type {Halaqah, RingkasanSantri} from '@/features/tahfidz/types';
 import type {Pelanggaran, Prestasi} from '@/features/kesantrian/types';
+import {
+  AsramaGedungScreen,
+  AsramaKamarScreen,
+  AsramaPenghuniScreen,
+} from '@/features/asrama/screens';
 import {useSetoranDetail} from '@/features/tahfidz/store';
 import {useAuthStore} from '@/store/auth.store';
 import {useAppStore} from '@/store/app.store';
+import {themeVars} from '@/theme';
 
 function useHydrated() {
   const [done, setDone] = useState(
@@ -39,7 +73,9 @@ function useHydrated() {
   );
   useEffect(() => {
     const check = () =>
-      setDone(useAuthStore.persist.hasHydrated() && useAppStore.persist.hasHydrated());
+      setDone(
+        useAuthStore.persist.hasHydrated() && useAppStore.persist.hasHydrated(),
+      );
     const offs = [
       useAuthStore.persist.onFinishHydration(check),
       useAppStore.persist.onFinishHydration(check),
@@ -67,44 +103,61 @@ function MainApp() {
   const [route, setRoute] = useState<string | null>(null);
   const [prestasi, setPrestasi] = useState<Prestasi | null>(null);
   const [pelanggaran, setPelanggaran] = useState<Pelanggaran | null>(null);
-  const [jenisForm, setJenisForm] = useState<{id: number; nama: string}[] | null>(null);
+  const [pelanggaranForm, setPelanggaranForm] = useState(false);
   const [izinForm, setIzinForm] = useState(false);
   const [halaqah, setHalaqah] = useState<Halaqah | null>(null);
   const [setoranForm, setSetoranForm] = useState(false);
-  const [ringkasanSantri, setRingkasanSantri] = useState<RingkasanSantri | null>(null);
+  const [ringkasanSantri, setRingkasanSantri] =
+    useState<RingkasanSantri | null>(null);
+  const [asramaGedungId, setAsramaGedungId] = useState<number | null>(null); // gedung terpilih dari menu Gedung
   const [mutabaahForm, setMutabaahForm] = useState(false);
   const [mutabaahDetail, setMutabaahDetail] = useState<{
     santri: RekapSantri;
     params: Omit<RekapParams, 'santri_id'>;
   } | null>(null);
+  const mutabaahVariant =
+    route === 'MutabaahAsatidzah' ? 'asatidzah' : 'santri';
   const [santriId, setSantriId] = useState<number | null>(null);
   const setUser = useAuthStore(s => s.setUser);
+  const themeId = useAppStore(s => s.themeId);
   useEffect(() => {
     getMe()
       .then(setUser)
       .catch(() => {}); // 401 ditangani interceptor (logout)
   }, [setUser]);
   return (
-    <View className="flex-1 bg-surface">
+    // key = tema: tombol/ikon yang membaca warna lewat JS ikut tergambar ulang saat tema berganti
+    <View key={themeId} className="flex-1 bg-surface">
       <View className="flex-1">
         {tab === 'home' ? (
           setoranDetail ? (
-            <SetoranDetailScreen item={setoranDetail} onBack={closeSetoranDetail} />
+            <SetoranDetailScreen
+              item={setoranDetail}
+              onBack={closeSetoranDetail}
+            />
           ) : route === 'SantriList' && santriId !== null ? (
-            <SantriDetailScreen id={santriId} onBack={() => setSantriId(null)} />
-          ) : route === 'MutabaahSantri' && mutabaahForm ? (
+            <SantriDetailScreen
+              id={santriId}
+              onBack={() => setSantriId(null)}
+            />
+          ) : (route === 'MutabaahSantri' || route === 'MutabaahAsatidzah') &&
+            mutabaahForm ? (
             <MutabaahSantriFormScreen
+              variant={mutabaahVariant}
               onBack={() => setMutabaahForm(false)}
               onSaved={() => setMutabaahForm(false)}
             />
-          ) : route === 'MutabaahSantri' && mutabaahDetail ? (
+          ) : (route === 'MutabaahSantri' || route === 'MutabaahAsatidzah') &&
+            mutabaahDetail ? (
             <MutabaahSantriDetailScreen
+              variant={mutabaahVariant}
               santri={mutabaahDetail.santri}
               params={mutabaahDetail.params}
               onBack={() => setMutabaahDetail(null)}
             />
-          ) : route === 'MutabaahSantri' ? (
+          ) : route === 'MutabaahSantri' || route === 'MutabaahAsatidzah' ? (
             <MutabaahSantriScreen
+              variant={mutabaahVariant}
               onBack={() => setRoute(null)}
               onCreate={() => setMutabaahForm(true)}
               onSelect={(santri, params) => setMutabaahDetail({santri, params})}
@@ -115,46 +168,115 @@ function MainApp() {
               onBack={() => setRingkasanSantri(null)}
             />
           ) : route === 'Ringkasan' ? (
-            <RingkasanScreen onBack={() => setRoute(null)} onSelect={setRingkasanSantri} />
+            <RingkasanScreen
+              onBack={() => setRoute(null)}
+              onSelect={setRingkasanSantri}
+            />
           ) : route === 'Setoran' && setoranForm ? (
             <SetoranFormScreen
               onBack={() => setSetoranForm(false)}
               onSaved={() => setSetoranForm(false)}
             />
           ) : route === 'Setoran' ? (
-            <SetoranScreen onBack={() => setRoute(null)} onCreate={() => setSetoranForm(true)} />
+            <SetoranScreen
+              onBack={() => setRoute(null)}
+              onCreate={() => setSetoranForm(true)}
+            />
           ) : route === 'Halaqoh' && halaqah ? (
-            <HalaqahDetailScreen halaqah={halaqah} onBack={() => setHalaqah(null)} />
+            <HalaqahDetailScreen
+              halaqah={halaqah}
+              onBack={() => setHalaqah(null)}
+            />
           ) : route === 'Halaqoh' ? (
-            <HalaqahScreen onBack={() => setRoute(null)} onSelect={setHalaqah} />
+            <HalaqahScreen
+              onBack={() => setRoute(null)}
+              onSelect={setHalaqah}
+            />
+          ) : route === 'AsramaGedung' ? (
+            <AsramaGedungScreen
+              onBack={() => setRoute(null)}
+              onSelect={id => {
+                setAsramaGedungId(id);
+                setRoute('AsramaKamar');
+              }}
+            />
+          ) : route === 'AsramaKamar' ? (
+            <AsramaKamarScreen
+              initialGedungId={asramaGedungId}
+              onBack={() => {
+                setAsramaGedungId(null);
+                setRoute(null);
+              }}
+            />
+          ) : route === 'AsramaPenghuni' ? (
+            <AsramaPenghuniScreen onBack={() => setRoute(null)} />
+          ) : route === 'Aduan' ? (
+            <AduanScreen onBack={() => setRoute(null)} />
+          ) : route === 'Rapor' ? (
+            <RaporScreen onBack={() => setRoute(null)} />
+          ) : route === 'Nilai' ? (
+            <NilaiScreen onBack={() => setRoute(null)} />
+          ) : route === 'Jadwal' ? (
+            <JadwalScreen onBack={() => setRoute(null)} />
+          ) : route === 'Absensi' ? (
+            <AbsensiScreen onBack={() => setRoute(null)} />
+          ) : route === 'Informasi' ? (
+            <InformasiScreen onBack={() => setRoute(null)} />
+          ) : route === 'Tagihan' ? (
+            <TagihanScreen onBack={() => setRoute(null)} />
+          ) : route === 'TarikTabungan' ? (
+            <TarikTabunganScreen onBack={() => setRoute(null)} />
+          ) : route === 'Tabungan' ? (
+            <TabunganScreen onBack={() => setRoute(null)} />
+          ) : route === 'Dispensasi' ? (
+            <DispensasiScreen onBack={() => setRoute(null)} />
+          ) : route === 'Konseling' ? (
+            <KonselingScreen onBack={() => setRoute(null)} />
           ) : route === 'Catatan' ? (
             <CatatanScreen onBack={() => setRoute(null)} />
           ) : route === 'Izin' && izinForm ? (
-            <IzinFormScreen onBack={() => setIzinForm(false)} onSaved={() => setIzinForm(false)} />
+            <IzinFormScreen
+              onBack={() => setIzinForm(false)}
+              onSaved={() => setIzinForm(false)}
+            />
           ) : route === 'Izin' ? (
-            <IzinScreen onBack={() => setRoute(null)} onCreate={() => setIzinForm(true)} />
+            <IzinScreen
+              onBack={() => setRoute(null)}
+              onCreate={() => setIzinForm(true)}
+            />
           ) : route === 'Prestasi' && prestasi ? (
-            <PrestasiDetailScreen initial={prestasi} onBack={() => setPrestasi(null)} />
+            <PrestasiDetailScreen
+              initial={prestasi}
+              onBack={() => setPrestasi(null)}
+            />
           ) : route === 'Prestasi' ? (
-            <PrestasiScreen onBack={() => setRoute(null)} onSelect={setPrestasi} />
-          ) : route === 'Pelanggaran' && jenisForm ? (
+            <PrestasiScreen
+              onBack={() => setRoute(null)}
+              onSelect={setPrestasi}
+            />
+          ) : route === 'Pelanggaran' && pelanggaranForm ? (
             <PelanggaranFormScreen
-              jenisOptions={jenisForm}
-              onBack={() => setJenisForm(null)}
-              onSaved={() => setJenisForm(null)}
+              onBack={() => setPelanggaranForm(false)}
+              onSaved={() => setPelanggaranForm(false)}
             />
           ) : route === 'Pelanggaran' && pelanggaran ? (
-            <PelanggaranDetailScreen item={pelanggaran} onBack={() => setPelanggaran(null)} />
+            <PelanggaranDetailScreen
+              item={pelanggaran}
+              onBack={() => setPelanggaran(null)}
+            />
           ) : route === 'Pelanggaran' ? (
             <PelanggaranScreen
               onBack={() => setRoute(null)}
               onSelect={setPelanggaran}
-              onCreate={setJenisForm}
+              onCreate={() => setPelanggaranForm(true)}
             />
           ) : route === 'KalenderPendidikan' ? (
             <KalenderScreen onBack={() => setRoute(null)} />
           ) : route === 'SantriList' ? (
-            <SantriListScreen onBack={() => setRoute(null)} onSelect={setSantriId} />
+            <SantriListScreen
+              onBack={() => setRoute(null)}
+              onSelect={setSantriId}
+            />
           ) : (
             <DashboardScreen onNavigate={setRoute} />
           )
@@ -172,23 +294,26 @@ function App() {
   const hydrated = useHydrated();
   const [splashDone, setSplashDone] = useState(false);
   const ready = splashDone && hydrated;
+  const themeId = useAppStore(s => s.themeId);
   const onSplashFinish = useCallback(() => setSplashDone(true), []);
 
   return (
     <SafeAreaProvider>
-      <StatusBar barStyle="light-content" />
-      {!ready ? (
-        <SplashScreen onFinish={onSplashFinish} />
-      ) : token ? (
-        <MainApp />
-      ) : onboardingDone ? (
-        <LoginScreen />
-      ) : (
-        <OnboardingScreen onFinish={finishOnboarding} />
-      )}
-      <DialogHost />
-      <ToastHost />
-      <PortalHost />
+      <View style={[{flex: 1}, themeVars(themeId)]}>
+        <StatusBar barStyle="light-content" />
+        {!ready ? (
+          <SplashScreen onFinish={onSplashFinish} />
+        ) : token ? (
+          <MainApp />
+        ) : onboardingDone ? (
+          <LoginScreen />
+        ) : (
+          <OnboardingScreen onFinish={finishOnboarding} />
+        )}
+        <DialogHost />
+        <ToastHost />
+        <PortalHost />
+      </View>
     </SafeAreaProvider>
   );
 }

@@ -48,10 +48,11 @@ type Props = {
   value: RekapFilter;
   onClose: () => void;
   onApply: (value: RekapFilter) => void;
+  showSantri?: boolean; // asatidzah tidak punya filter per orang
 };
 
 /** Bulan dan rentang tanggal saling menggantikan: memilih salah satu mengosongkan yang lain. */
-export function RekapFilterSheet({visible, value, onClose, onApply}: Props) {
+export function RekapFilterSheet({visible, value, onClose, onApply, showSantri = true}: Props) {
   const [draft, setDraft] = useState(value);
   const [page, setPage] = useState<Page>('main');
 
@@ -121,6 +122,7 @@ export function RekapFilterSheet({visible, value, onClose, onApply}: Props) {
       ) : (
         <>
           <View className="gap-4 pb-1">
+            {showSantri ? (
             <PickerField
               icon={User}
               label="Santri"
@@ -129,6 +131,7 @@ export function RekapFilterSheet({visible, value, onClose, onApply}: Props) {
               onPress={() => setPage('santri')}
               onClear={() => setDraft(d => ({...d, santri: null}))}
             />
+            ) : null}
             <PickerField
               icon={CalendarRange}
               label="Bulan"

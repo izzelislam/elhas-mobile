@@ -1,11 +1,16 @@
 import {
   Banknote,
   BedDouble,
+  Building2,
+  DoorOpen,
   BookOpenCheck,
   CalendarCheck,
   GraduationCap,
   Info,
+  FileClock,
   LucideIcon,
+  MessageSquareWarning,
+  MessagesSquare,
   Users,
   ClipboardCheck,
   UserCheck,
@@ -21,8 +26,9 @@ import {
   Mic,
   ChartColumn,
   UserRound,
+  Wallet,
   PiggyBank,
-  ReceiptText,
+  Receipt,
 } from 'lucide-react-native';
 import type {TintName} from '@/theme';
 
@@ -35,6 +41,7 @@ export const MENU_VISUAL: Record<string, {icon: LucideIcon; tint: TintName}> = {
   tahfidz: {icon: BookOpenCheck, tint: 'purple'},
   mutabaah: {icon: CalendarCheck, tint: 'orange'},
   keuangan: {icon: Banknote, tint: 'pink'},
+  aduan: {icon: MessageSquareWarning, tint: 'orange'},
   informasi: {icon: Info, tint: 'gray'},
 };
 
@@ -49,11 +56,17 @@ export const SUBMENU_ICON: Record<string, LucideIcon> = {
   pelanggaran: TriangleAlert,
   izin: FileCheck,
   catatan: NotebookPen,
+  konseling: MessagesSquare,
+  dispensasi: FileClock,
   halaqoh: UsersRound,
   setoran: Mic,
   ringkasan: ChartColumn,
+  'asrama-gedung': Building2,
+  'asrama-kamar': DoorOpen,
+  'asrama-penghuni': Users,
   'mutabaah-santri': UserRound,
   'mutabaah-asatidzah': UserCheck,
   tabungan: PiggyBank,
-  spp: ReceiptText,
+  'tarik-tabungan': Wallet,
+  tagihan: Receipt,
 };

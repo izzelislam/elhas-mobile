@@ -1,5 +1,5 @@
 import {http} from '@/services/api/client';
-import type {SetoranListResponse} from '../types';
+import type {DetailHafalanSantriResponse, SetoranListResponse} from '../types';
 
 export async function getSetoranList(params: {
   per_page?: number;
@@ -30,4 +30,9 @@ export async function createSetoran(payload: CreateSetoranPayload) {
     payload,
   );
   return data;
+}
+
+export async function getHafalanSantri(id: number, params: {tahun: number; bulan: number}) {
+  const {data} = await http.get<DetailHafalanSantriResponse>(`/hafalan/santri/${id}`, {params});
+  return data.data;
 }

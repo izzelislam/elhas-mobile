@@ -2,7 +2,6 @@ import React, {useCallback, useEffect, useState} from 'react';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
-  Platform,
   Pressable,
   ScrollView,
   Switch,
@@ -22,7 +21,7 @@ import {SantriPicker} from '@/features/santri/components/SantriPicker';
 import {colors} from '@/theme';
 import {describeError} from '@/lib/errors';
 import {toast} from '@/store/toast.store';
-import {createMutabaahSantri, getIndikatorSantri} from '../services/mutabaahSantri.service';
+import {MutabaahVariant, createMutabaah, getIndikator} from '../services/mutabaah.service';
 import type {Indikator} from '../types';
 
 type ItemState = {dikerjakan: boolean; catatan: string; showCatatan: boolean};
@@ -58,10 +57,13 @@ function errorMessage(err: unknown) {
 export default function MutabaahSantriFormScreen({
   onBack,
   onSaved,
+  variant = 'santri',
 }: {
   onBack: () => void;
   onSaved: () => void;
+  variant?: MutabaahVariant;
 }) {
+  const isSantri = variant === 'santri';
   const insets = useSafeAreaInsets();
   const [indikator, setIndikator] = useState<Indikator[]>([]);
   const [items, setItems] = useState<Record<number, ItemState>>({});
@@ -76,7 +78,7 @@ export default function MutabaahSantriFormScreen({
   const loadIndikator = useCallback(async () => {
     setLoading(true);
     try {
-      const list = (await getIndikatorSantri()).sort((a, b) => a.urutan - b.urutan);
+      const list = (await getIndikator(variant)).sort((a, b) => a.urutan - b.urutan);
       setIndikator(list);
       setItems(
         Object.fromEntries(
@@ -92,7 +94,7 @@ export default function MutabaahSantriFormScreen({
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [variant]);
 
   useEffect(() => {
     loadIndikator();
@@ -112,15 +114,15 @@ export default function MutabaahSantriFormScreen({
     );
 
   const submit = async () => {
-    if (!santri) {
+    if (isSantri && !santri) {
       setSantriError('Santri wajib dipilih');
       return;
     }
     setSaving(true);
     try {
-      const res = await createMutabaahSantri({
+      const res = await createMutabaah(variant, {
         tanggal,
-        subjek_id: santri.id,
+        subjek_id: santri?.id,
         items: indikator.map(i => ({
           indikator_id: i.id,
           dikerjakan: items[i.id]?.dikerjakan ?? false,
@@ -139,13 +141,13 @@ export default function MutabaahSantriFormScreen({
   return (
     <KeyboardAvoidingView
       className="flex-1 bg-canvas"
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      behavior="padding">
       <View style={{paddingTop: insets.top + 24}} className="bg-brand px-5 pb-5">
         <View className="flex-row items-center">
           <Pressable onPress={onBack} hitSlop={10}>
             <ArrowLeft size={22} color={colors.brand.foreground} />
           </Pressable>
-          <Text className="ml-3 text-title text-brand-foreground">Input Mutabaah Santri</Text>
+          <Text className="ml-3 text-title text-brand-foreground">{isSantri ? 'Input Mutabaah Santri' : 'Input Mutabaah Asatidzah'}</Text>
         </View>
       </View>
 
@@ -154,6 +156,7 @@ export default function MutabaahSantriFormScreen({
         contentContainerStyle={{padding: 20, paddingBottom: insets.bottom + 100}}
         showsVerticalScrollIndicator={false}>
         <View className="gap-5 rounded-card bg-surface p-5">
+          {isSantri ? (
           <View>
             <PickerField
               icon={User}
@@ -167,6 +170,7 @@ export default function MutabaahSantriFormScreen({
               <Text className="mt-1 text-caption text-destructive">{santriError}</Text>
             ) : null}
           </View>
+          ) : null}
           <PickerField
             icon={CalendarDays}
             label="Tanggal"

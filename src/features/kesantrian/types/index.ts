@@ -97,3 +97,26 @@ export type CatatanListResponse = {
     meta: {current_page: number; last_page: number; per_page: number; total: number};
   };
 };
+
+export type Konseling = {
+  id: number;
+  santri: {id: number; nama_lengkap: string; nis: string} | null;
+  konselor: {id: number; name: string} | null;
+  tanggal: string;
+  topik: string;
+  catatan: string | null;
+  tindak_lanjut: string | null;
+  status: string;
+};
+
+export type Dispensasi = {
+  id: number;
+  santri: {id: number; nama_lengkap: string; nis: string} | null;
+  pengaju: {id: number; name: string} | null;
+  jenis: string;
+  tanggal_mulai: string;
+  tanggal_selesai: string;
+  keterangan: string | null;
+  status: string;
+  disetujui_oleh: {id: number; name: string} | null;
+};

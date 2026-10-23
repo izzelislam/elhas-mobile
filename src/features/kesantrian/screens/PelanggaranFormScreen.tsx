@@ -1,7 +1,6 @@
-import React, {useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {
   KeyboardAvoidingView,
-  Platform,
   Pressable,
   ScrollView,
   Text,
@@ -10,22 +9,43 @@ import {
 } from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {isAxiosError} from 'axios';
-import {ArrowLeft, CalendarDays, User} from 'lucide-react-native';
+import {ArrowLeft, CalendarDays, Check, ShieldAlert, User} from 'lucide-react-native';
 import {BottomSheet} from '@/components/ui/BottomSheet';
 import {Button} from '@/components/ui/Button';
 import {CalendarPicker} from '@/components/ui/CalendarPicker';
 import {PickerField} from '@/components/ui/PickerField';
-import {Select} from '@/components/ui/Select';
 import {SantriPicker} from '@/features/santri/components/SantriPicker';
 import {colors} from '@/theme';
 import {toast} from '@/store/toast.store';
-import {createPelanggaran} from '../services/pelanggaran.service';
+import {
+  JenisPelanggaran,
+  createPelanggaran,
+  getJenisPelanggaran,
+} from '../services/pelanggaran.service';
 
 type Props = {
-  jenisOptions: {id: number; nama: string}[];
   onBack: () => void;
   onSaved: () => void;
 };
+
+const KATEGORI: Record<string, {label: string; color: string; order: number}> = {
+  ringan: {label: 'Ringan', color: '#6B7280', order: 0},
+  sedang: {label: 'Sedang', color: '#D97706', order: 1},
+  berat: {label: 'Berat', color: '#DC2626', order: 2},
+};
+const kategoriOf = (j: JenisPelanggaran) =>
+  KATEGORI[j.kategori.value] ?? {label: j.kategori.label, color: '#6B7280', order: 9};
+
+function KategoriChip({j}: {j: JenisPelanggaran}) {
+  const k = kategoriOf(j);
+  return (
+    <View style={{backgroundColor: k.color + '1A'}} className="rounded-full px-2.5 py-0.5">
+      <Text style={{color: k.color}} className="text-caption font-medium">
+        {k.label} · {j.poin} poin
+      </Text>
+    </View>
+  );
+}
 
 const dateId = (v: string) =>
   new Date(v + 'T00:00:00').toLocaleDateString('id-ID', {
@@ -50,15 +70,46 @@ function errorMessage(err: unknown) {
   return 'Terjadi kesalahan, coba lagi';
 }
 
-export default function PelanggaranFormScreen({jenisOptions, onBack, onSaved}: Props) {
+export default function PelanggaranFormScreen({onBack, onSaved}: Props) {
   const insets = useSafeAreaInsets();
   const [santri, setSantri] = useState<{id: number; nama: string} | null>(null);
+  const [jenisList, setJenisList] = useState<JenisPelanggaran[]>([]);
+  const [jenisLoading, setJenisLoading] = useState(true);
   const [jenisId, setJenisId] = useState<number | null>(null);
   const [tanggal, setTanggal] = useState<string>(todayKey());
   const [catatan, setCatatan] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [sheet, setSheet] = useState<'santri' | 'tanggal' | null>(null);
+  const [sheet, setSheet] = useState<'santri' | 'tanggal' | 'jenis' | null>(null);
   const [saving, setSaving] = useState(false);
+
+  const loadJenis = useCallback(async () => {
+    setJenisLoading(true);
+    try {
+      setJenisList(await getJenisPelanggaran());
+    } catch {
+      toast.error('Gagal memuat jenis pelanggaran');
+    } finally {
+      setJenisLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadJenis();
+  }, [loadJenis]);
+
+  const jenis = jenisList.find(j => j.id === jenisId) ?? null;
+  const groups = useMemo(() => {
+    const map = new Map<string, JenisPelanggaran[]>();
+    jenisList.forEach(j => map.set(j.kategori.value, [...(map.get(j.kategori.value) ?? []), j]));
+    return Array.from(map.entries())
+      .sort(([a], [b]) => (KATEGORI[a]?.order ?? 9) - (KATEGORI[b]?.order ?? 9))
+      .map(([key, list]) => ({
+        key,
+        label: list[0].kategori.label,
+        color: (KATEGORI[key] ?? {color: '#6B7280'}).color,
+        items: [...list].sort((x, y) => x.nama.localeCompare(y.nama)),
+      }));
+  }, [jenisList]);
 
   const submit = async () => {
     const e: Record<string, string> = {};
@@ -92,7 +143,7 @@ export default function PelanggaranFormScreen({jenisOptions, onBack, onSaved}: P
   return (
     <KeyboardAvoidingView
       className="flex-1 bg-canvas"
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      behavior="padding">
       <View style={{paddingTop: insets.top + 24}} className="bg-brand px-5 pb-5">
         <View className="flex-row items-center">
           <Pressable onPress={onBack} hitSlop={10}>
@@ -122,16 +173,19 @@ export default function PelanggaranFormScreen({jenisOptions, onBack, onSaved}: P
           </View>
 
           <View>
-            <Select<number | null>
+            <PickerField
+              icon={ShieldAlert}
               label="Jenis Pelanggaran"
-              placeholder="Pilih jenis pelanggaran"
-              value={jenisId}
-              onChange={v => {
-                setJenisId(v);
-                setErrors(er => ({...er, jenis: ''}));
-              }}
-              options={jenisOptions.map(j => ({value: j.id, label: j.nama}))}
+              value={jenis?.nama ?? null}
+              placeholder={jenisLoading ? 'Memuat jenis pelanggaran…' : 'Pilih jenis pelanggaran'}
+              onPress={() => (jenisList.length ? setSheet('jenis') : loadJenis())}
+              onClear={() => setJenisId(null)}
             />
+            {jenis ? (
+              <View className="mt-2 self-start">
+                <KategoriChip j={jenis} />
+              </View>
+            ) : null}
             {errors.jenis ? (
               <Text className="mt-1 text-caption text-destructive">{errors.jenis}</Text>
             ) : null}
@@ -174,6 +228,41 @@ export default function PelanggaranFormScreen({jenisOptions, onBack, onSaved}: P
             setSheet(null);
           }}
         />
+      </BottomSheet>
+      <BottomSheet
+        visible={sheet === 'jenis'}
+        title="Pilih Jenis Pelanggaran"
+        onClose={() => setSheet(null)}>
+        <ScrollView style={{maxHeight: 440}} showsVerticalScrollIndicator={false}>
+          {groups.map(g => (
+            <View key={g.key} className="mb-2">
+              <Text
+                style={{color: g.color}}
+                className="mb-1 text-caption font-semibold uppercase tracking-wide">
+                {g.label}
+              </Text>
+              {g.items.map(j => {
+                const active = j.id === jenisId;
+                return (
+                  <Pressable
+                    key={j.id}
+                    onPress={() => {
+                      setJenisId(j.id);
+                      setErrors(er => ({...er, jenis: ''}));
+                      setSheet(null);
+                    }}
+                    className="flex-row items-center border-t border-line py-3 active:opacity-70">
+                    <Text className="flex-1 pr-3 text-body text-ink">{j.nama}</Text>
+                    <Text className="text-label font-medium text-ink-muted">{j.poin} poin</Text>
+                    {active ? (
+                      <Check size={16} color={colors.brand.DEFAULT} style={{marginLeft: 8}} />
+                    ) : null}
+                  </Pressable>
+                );
+              })}
+            </View>
+          ))}
+        </ScrollView>
       </BottomSheet>
       <BottomSheet
         visible={sheet === 'tanggal'}

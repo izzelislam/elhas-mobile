@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {KeyboardAvoidingView, Platform, ScrollView, Text, View} from 'react-native';
+import {KeyboardAvoidingView, ScrollView, Text, View} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Lock, Mail} from 'lucide-react-native';
 import {Card} from '@/components/ui/Card';
@@ -52,7 +52,7 @@ export default function LoginScreen() {
   return (
     <KeyboardAvoidingView
       className="flex-1 bg-canvas"
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      behavior="padding">
       <ScrollView
         contentContainerClassName="flex-grow"
         keyboardShouldPersistTaps="handled"

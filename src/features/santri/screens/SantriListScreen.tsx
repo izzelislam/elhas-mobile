@@ -1,24 +1,20 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
-import {ActivityIndicator, FlatList, Pressable, ScrollView, Text, TextInput, View} from 'react-native';
+import {ActivityIndicator, FlatList, Pressable, Text, TextInput, View} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {ArrowLeft, Search, X} from 'lucide-react-native';
+import {ArrowLeft, Search, SlidersHorizontal, X} from 'lucide-react-native';
 import {Button} from '@/components/ui/Button';
 import {colors} from '@/theme';
 import {toast} from '@/store/toast.store';
 import {SantriItem} from '../components/SantriItem';
+import {
+  DEFAULT_SANTRI_FILTER,
+  SantriFilter,
+  SantriFilterSheet,
+} from '../components/SantriFilterSheet';
 import {getSantriList} from '../services/santri.service';
 import type {Santri} from '../types';
 
 const PER_PAGE = 15;
-
-const STATUS_OPTIONS = [
-  {value: 'aktif', label: 'Aktif'},
-  {value: 'alumni', label: 'Alumni'},
-  {value: 'pindah', label: 'Pindah'},
-  {value: 'dikeluarkan', label: 'Dikeluarkan'},
-  {value: 'cuti', label: 'Cuti'},
-  {value: 'all', label: 'Semua'},
-];
 
 export default function SantriListScreen({
   onBack,
@@ -35,7 +31,8 @@ export default function SantriListScreen({
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const [failed, setFailed] = useState(false);
-  const [status, setStatus] = useState('aktif');
+  const [filter, setFilter] = useState<SantriFilter>(DEFAULT_SANTRI_FILTER);
+  const [sheet, setSheet] = useState(false);
   const [search, setSearch] = useState('');
   const [query, setQuery] = useState('');
   const page = useRef(1);
@@ -47,7 +44,8 @@ export default function SantriListScreen({
       const id = ++requestId.current;
       try {
         const res = await getSantriList({
-          status,
+          status: filter.status,
+          kelas_id: filter.kelasId ?? undefined,
           search: query || undefined,
           per_page: PER_PAGE,
           page: target,
@@ -77,7 +75,7 @@ export default function SantriListScreen({
         }
       }
     },
-    [status, query],
+    [filter, query],
   );
 
   // debounce pencarian
@@ -99,6 +97,8 @@ export default function SantriListScreen({
     }
   };
 
+  const activeCount = (filter.status !== 'aktif' ? 1 : 0) + (filter.kelasId !== null ? 1 : 0);
+
   return (
     <View className="flex-1 bg-canvas">
       <View style={{paddingTop: insets.top + 24}} className="bg-brand px-5 pb-5">
@@ -110,20 +110,20 @@ export default function SantriListScreen({
         </View>
         {total > 0 ? (
           <Text className="ml-9 mt-1 text-label text-brand-foreground opacity-80">
-            {total} santri
+            {total} santri{activeCount > 0 ? ' (terfilter)' : ''}
           </Text>
         ) : null}
       </View>
 
-      <View className="bg-surface pb-1 pt-3">
-        <View className="mx-5 flex-row items-center rounded-card bg-field px-3">
+      <View className="flex-row items-center gap-3 bg-surface px-5 py-3">
+        <View className="h-11 flex-1 flex-row items-center rounded-card bg-field px-3">
           <Search size={18} color={colors.brand.DEFAULT} />
           <TextInput
             value={search}
             onChangeText={setSearch}
             placeholder="Cari nama santri"
             returnKeyType="search"
-            className="ml-2 h-11 flex-1 text-body text-ink"
+            className="ml-2 flex-1 text-body text-ink"
           />
           {search ? (
             <Pressable onPress={() => setSearch('')} hitSlop={10}>
@@ -131,27 +131,16 @@ export default function SantriListScreen({
             </Pressable>
           ) : null}
         </View>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{paddingHorizontal: 20, paddingVertical: 10, gap: 8}}>
-          {STATUS_OPTIONS.map(o => {
-            const active = o.value === status;
-            return (
-              <Pressable
-                key={o.value}
-                onPress={() => setStatus(o.value)}
-                className={`rounded-full px-4 py-1.5 ${active ? 'bg-brand' : 'bg-brand-light'}`}>
-                <Text
-                  className={`text-label font-medium ${
-                    active ? 'text-brand-foreground' : 'text-brand'
-                  }`}>
-                  {o.label}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
+        <Pressable
+          onPress={() => setSheet(true)}
+          hitSlop={8}
+          accessibilityLabel="Filter"
+          className="h-11 w-11 items-center justify-center rounded-card bg-field active:opacity-80">
+          <SlidersHorizontal size={20} color={colors.brand.DEFAULT} />
+          {activeCount > 0 ? (
+            <View className="absolute right-2 top-2 h-2.5 w-2.5 rounded-icon border border-field bg-destructive" />
+          ) : null}
+        </Pressable>
       </View>
 
       {loading ? (
@@ -206,6 +195,12 @@ export default function SantriListScreen({
           }
         />
       )}
+      <SantriFilterSheet
+        visible={sheet}
+        value={filter}
+        onClose={() => setSheet(false)}
+        onApply={setFilter}
+      />
     </View>
   );
 }

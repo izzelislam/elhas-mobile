@@ -11,7 +11,13 @@ module.exports = {
       fontFamily: tokens.fontFamily,
       fontSize: tokens.fontSize,
       colors: {
-        brand: tokens.colors.brand,
+        // Warna brand mengikuti tema aktif lewat variabel CSS (lihat src/theme/themes.js)
+        brand: {
+          DEFAULT: 'rgb(var(--brand) / <alpha-value>)',
+          dark: 'rgb(var(--brand-dark) / <alpha-value>)',
+          light: 'rgb(var(--brand-light) / <alpha-value>)',
+          foreground: 'rgb(var(--brand-foreground) / <alpha-value>)',
+        },
         surface: tokens.colors.surface,
         canvas: tokens.colors.canvas,
         line: tokens.colors.line,

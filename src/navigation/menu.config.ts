@@ -22,9 +22,19 @@ export const MENU: MenuItem[] = [
       {key: 'pelanggaran', label: 'Pelanggaran', route: 'Pelanggaran'},
       {key: 'izin', label: 'Izin', route: 'Izin'},
       {key: 'catatan', label: 'Catatan', route: 'Catatan'},
+      {key: 'konseling', label: 'Konseling', route: 'Konseling'},
+      {key: 'dispensasi', label: 'Dispensasi', route: 'Dispensasi'},
     ],
   },
-  {key: 'asrama', label: 'Asrama', route: 'Asrama'},
+  {
+    key: 'asrama',
+    label: 'Asrama',
+    children: [
+      {key: 'asrama-gedung', label: 'Gedung', route: 'AsramaGedung'},
+      {key: 'asrama-kamar', label: 'Kamar', route: 'AsramaKamar'},
+      {key: 'asrama-penghuni', label: 'Penghuni', route: 'AsramaPenghuni'},
+    ],
+  },
   {
     key: 'tahfidz',
     label: 'Tahfidz',
@@ -47,8 +57,10 @@ export const MENU: MenuItem[] = [
     label: 'Keuangan',
     children: [
       {key: 'tabungan', label: 'Tabungan', route: 'Tabungan'},
-      {key: 'spp', label: 'SPP', route: 'Spp'},
+      {key: 'tarik-tabungan', label: 'Setor / Tarik', route: 'TarikTabungan'},
+      {key: 'tagihan', label: 'Tagihan', route: 'Tagihan'},
     ],
   },
+  {key: 'aduan', label: 'Aduan', route: 'Aduan'},
   {key: 'informasi', label: 'Informasi', route: 'Informasi'},
 ];

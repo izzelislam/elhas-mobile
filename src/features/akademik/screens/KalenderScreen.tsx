@@ -52,7 +52,9 @@ function range(e: KalenderEvent) {
   const b = startOfDay(e.tanggal_selesai);
   const days = Math.round((b.getTime() - a.getTime()) / DAY) + 1;
   const text =
-    days <= 1 ? fmt(a, true) : `${fmt(a, a.getFullYear() !== b.getFullYear())} – ${fmt(b, true)}`;
+    days <= 1
+      ? fmt(a, true)
+      : `${fmt(a, a.getFullYear() !== b.getFullYear())} – ${fmt(b, true)}`;
   return {a, b, days, text};
 }
 
@@ -108,7 +110,9 @@ export default function KalenderScreen({onBack}: {onBack: () => void}) {
       // daftar tahun ajaran dikumpulkan dari data yang pernah dimuat
       setTahunList(prev => {
         const map = new Map(prev.map(t => [t.id, t]));
-        data.forEach(e => e.tahun_ajaran && map.set(e.tahun_ajaran.id, e.tahun_ajaran));
+        data.forEach(
+          e => e.tahun_ajaran && map.set(e.tahun_ajaran.id, e.tahun_ajaran),
+        );
         return Array.from(map.values()).sort(
           (x, y) => +new Date(y.tanggal_mulai) - +new Date(x.tanggal_mulai),
         );
@@ -141,9 +145,15 @@ export default function KalenderScreen({onBack}: {onBack: () => void}) {
     }
   };
 
-  const [knownTipe, setKnownTipe] = useState<string[]>(['kegiatan', 'ujian', 'libur']);
+  const [knownTipe, setKnownTipe] = useState<string[]>([
+    'kegiatan',
+    'ujian',
+    'libur',
+  ]);
   useEffect(() => {
-    setKnownTipe(prev => Array.from(new Set([...prev, ...events.map(e => e.tipe)])));
+    setKnownTipe(prev =>
+      Array.from(new Set([...prev, ...events.map(e => e.tipe)])),
+    );
   }, [events]);
   const tipeOptions = useMemo(() => ['all', ...knownTipe], [knownTipe]);
 
@@ -168,12 +178,17 @@ export default function KalenderScreen({onBack}: {onBack: () => void}) {
 
   return (
     <View className="flex-1 bg-canvas">
-      <View style={{paddingTop: insets.top + 24}} className="bg-brand px-5 pb-5">
+      <View
+        style={{paddingTop: insets.top + 24}}
+        className="bg-brand px-5 pb-5"
+      >
         <View className="flex-row items-center">
           <Pressable onPress={onBack} hitSlop={10}>
             <ArrowLeft size={22} color={colors.brand.foreground} />
           </Pressable>
-          <Text className="ml-3 flex-1 text-title text-brand-foreground">Kalender Pendidikan</Text>
+          <Text className="ml-3 flex-1 text-title text-brand-foreground">
+            Kalender Pendidikan
+          </Text>
           <Pressable onPress={openSheet} hitSlop={10}>
             <SlidersHorizontal size={22} color={colors.brand.foreground} />
             {tahunId !== null || tipe !== 'all' ? (
@@ -208,7 +223,10 @@ export default function KalenderScreen({onBack}: {onBack: () => void}) {
       ) : (
         <>
           <ScrollView
-            contentContainerStyle={{padding: 20, paddingBottom: insets.bottom + 20}}
+            contentContainerStyle={{
+              padding: 20,
+              paddingBottom: insets.bottom + 20,
+            }}
             showsVerticalScrollIndicator={false}
             refreshControl={
               <RefreshControl
@@ -218,11 +236,14 @@ export default function KalenderScreen({onBack}: {onBack: () => void}) {
                   load();
                 }}
               />
-            }>
+            }
+          >
             {groups.length === 0 ? (
               <View className="mt-10 items-center">
                 <CalendarDays size={40} color={colors.text.muted} />
-                <Text className="mt-3 text-body text-ink-muted">Belum ada agenda</Text>
+                <Text className="mt-3 text-body text-ink-muted">
+                  Belum ada agenda
+                </Text>
               </View>
             ) : (
               groups.map(([month, list]) => (
@@ -238,17 +259,23 @@ export default function KalenderScreen({onBack}: {onBack: () => void}) {
                       <Card
                         key={e.id}
                         style={{opacity: st.done ? 0.65 : 1}}
-                        className="mb-3 border-0 p-4">
+                        className="mb-3 border-0 p-4"
+                      >
                         <View className="flex-row">
                           <View
                             style={{backgroundColor: c + '1A'}}
-                            className="h-14 w-14 items-center justify-center rounded-2xl">
-                            <Text style={{color: c}} className="text-title font-bold leading-6">
+                            className="h-14 w-14 items-center justify-center rounded-2xl"
+                          >
+                            <Text
+                              style={{color: c}}
+                              className="text-title font-bold leading-6"
+                            >
                               {a.getDate()}
                             </Text>
                             <Text
                               style={{color: c}}
-                              className="text-caption font-medium uppercase">
+                              className="text-caption font-medium uppercase"
+                            >
                               {a.toLocaleDateString('id-ID', {month: 'short'})}
                             </Text>
                           </View>
@@ -257,7 +284,10 @@ export default function KalenderScreen({onBack}: {onBack: () => void}) {
                               {e.nama_kegiatan}
                             </Text>
                             <View className="mt-1 flex-row items-center">
-                              <CalendarDays size={13} color={colors.text.muted} />
+                              <CalendarDays
+                                size={13}
+                                color={colors.text.muted}
+                              />
                               <Text className="ml-1.5 flex-1 text-caption text-ink-muted">
                                 {text}
                                 {days > 1 ? ` · ${days} hari` : ''}
@@ -266,13 +296,19 @@ export default function KalenderScreen({onBack}: {onBack: () => void}) {
                           </View>
                         </View>
                         {e.deskripsi ? (
-                          <Text className="mt-3 text-label text-ink-muted">{e.deskripsi}</Text>
+                          <Text className="mt-3 text-label text-ink-muted">
+                            {e.deskripsi}
+                          </Text>
                         ) : null}
                         <View className="mt-3 flex-row items-center justify-between border-t border-line pt-3">
                           <View
                             style={{backgroundColor: c + '1A'}}
-                            className="rounded-full px-2.5 py-0.5">
-                            <Text style={{color: c}} className="text-caption font-medium capitalize">
+                            className="rounded-full px-2.5 py-0.5"
+                          >
+                            <Text
+                              style={{color: c}}
+                              className="text-caption font-medium capitalize"
+                            >
                               {e.tipe}
                             </Text>
                           </View>
@@ -281,7 +317,10 @@ export default function KalenderScreen({onBack}: {onBack: () => void}) {
                               style={{backgroundColor: st.color}}
                               className="mr-1.5 h-2 w-2 rounded-full"
                             />
-                            <Text style={{color: st.color}} className="text-caption font-medium">
+                            <Text
+                              style={{color: st.color}}
+                              className="text-caption font-medium"
+                            >
                               {st.label}
                             </Text>
                           </View>
@@ -295,7 +334,11 @@ export default function KalenderScreen({onBack}: {onBack: () => void}) {
           </ScrollView>
         </>
       )}
-      <BottomSheet visible={sheet} title="Filter" onClose={() => setSheet(false)}>
+      <BottomSheet
+        visible={sheet}
+        title="Filter"
+        onClose={() => setSheet(false)}
+      >
         <View className="gap-4 pb-1">
           <Select<number | null>
             label="Tahun Ajaran"
@@ -316,7 +359,10 @@ export default function KalenderScreen({onBack}: {onBack: () => void}) {
               onChange={setDraftTipe}
               options={tipeOptions.map(t => ({
                 value: t,
-                label: t === 'all' ? 'Semua tipe' : t.charAt(0).toUpperCase() + t.slice(1),
+                label:
+                  t === 'all'
+                    ? 'Semua tipe'
+                    : t.charAt(0).toUpperCase() + t.slice(1),
               }))}
             />
           ) : null}

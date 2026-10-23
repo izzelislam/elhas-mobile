@@ -13,7 +13,7 @@ import {
   RekapFilter,
   RekapFilterSheet,
 } from '../components/RekapFilterSheet';
-import {RekapParams, getRekapSantri} from '../services/mutabaahSantri.service';
+import {MutabaahVariant, RekapParams, getRekap} from '../services/mutabaah.service';
 import type {RekapResponse, RekapSantri} from '../types';
 
 type Rekap = RekapResponse['data'];
@@ -45,7 +45,9 @@ function RekapItem({item, onPress}: {item: RekapSantri; onPress: () => void}) {
           <Text className="text-body font-semibold text-ink" numberOfLines={1}>
             {item.nama}
           </Text>
-          <Text className="text-caption text-ink-muted">NIS {item.nomor_induk}</Text>
+          {item.nomor_induk ? (
+            <Text className="text-caption text-ink-muted">NIS {item.nomor_induk}</Text>
+          ) : null}
         </View>
         <View style={{backgroundColor: c + '1A'}} className="ml-2 rounded-full px-2.5 py-1">
           <Text style={{color: c}} className="text-caption font-semibold">
@@ -82,10 +84,12 @@ export default function MutabaahSantriScreen({
   onBack,
   onCreate,
   onSelect,
+  variant = 'santri',
 }: {
   onBack: () => void;
   onCreate: () => void;
   onSelect: (item: RekapSantri, params: Omit<RekapParams, 'santri_id'>) => void;
+  variant?: MutabaahVariant;
 }) {
   const insets = useSafeAreaInsets();
   const [data, setData] = useState<Rekap | null>(null);
@@ -96,11 +100,12 @@ export default function MutabaahSantriScreen({
   const [filter, setFilter] = useState<RekapFilter>(EMPTY_REKAP_FILTER);
   const [sheet, setSheet] = useState(false);
   const requestId = useRef(0);
+  const isSantri = variant === 'santri';
 
   const load = useCallback(async () => {
     const id = ++requestId.current;
     try {
-      const res = await getRekapSantri({
+      const res = await getRekap(variant, {
         santri_id: filter.santri?.id,
         bulan: filter.bulan ?? undefined,
         tanggal_mulai: filter.tanggalMulai ?? undefined,
@@ -125,7 +130,7 @@ export default function MutabaahSantriScreen({
         setRefreshing(false);
       }
     }
-  }, [filter]);
+  }, [variant, filter]);
 
   useEffect(() => {
     setLoading(true);
@@ -151,7 +156,7 @@ export default function MutabaahSantriScreen({
           <Pressable onPress={onBack} hitSlop={10}>
             <ArrowLeft size={22} color={colors.brand.foreground} />
           </Pressable>
-          <Text className="ml-3 flex-1 text-title text-brand-foreground">Mutabaah Santri</Text>
+          <Text className="ml-3 flex-1 text-title text-brand-foreground">{isSantri ? 'Mutabaah Santri' : 'Mutabaah Asatidzah'}</Text>
           <Pressable onPress={() => setSheet(true)} hitSlop={10}>
             <SlidersHorizontal size={22} color={colors.brand.foreground} />
             {activeCount > 0 ? (
@@ -172,7 +177,7 @@ export default function MutabaahSantriScreen({
           <TextInput
             value={search}
             onChangeText={setSearch}
-            placeholder="Cari nama santri"
+            placeholder={isSantri ? 'Cari nama santri' : 'Cari nama asatidzah'}
             returnKeyType="search"
             className="ml-2 h-11 flex-1 text-body text-ink"
           />
@@ -224,14 +229,14 @@ export default function MutabaahSantriScreen({
           }}
           ListHeaderComponent={
             <Text className="mb-2 ml-1 text-caption font-medium tracking-wide text-ink-muted">
-              REKAP · {rows.length} SANTRI{activeCount > 0 ? ' (TERFILTER)' : ''}
+              REKAP · {rows.length} {isSantri ? 'SANTRI' : 'ASATIDZAH'}{activeCount > 0 ? ' (TERFILTER)' : ''}
             </Text>
           }
           ListEmptyComponent={
             <View className="mt-10 items-center">
               <ClipboardCheck size={40} color={colors.text.muted} />
               <Text className="mt-3 text-body text-ink-muted">
-                {query ? 'Santri tidak ditemukan' : 'Belum ada data mutabaah'}
+                {query ? isSantri ? 'Santri tidak ditemukan' : 'Asatidzah tidak ditemukan' : 'Belum ada data mutabaah'}
               </Text>
             </View>
           }
@@ -250,6 +255,7 @@ export default function MutabaahSantriScreen({
         value={filter}
         onClose={() => setSheet(false)}
         onApply={setFilter}
+        showSantri={isSantri}
       />
     </View>
   );

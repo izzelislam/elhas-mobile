@@ -54,7 +54,20 @@ export type SantriDetail = Omit<Santri, 'asrama_aktif'> & {
   tanggal_keluar: string | null;
   kategori_spp: LabeledValue | null;
   catatan: string | null;
-  tabungan: {no_rekening: string; saldo: string} | null;
+  tabungan: {
+    id: number;
+    no_rekening: string;
+    saldo: string;
+    transaksi_terakhir: {
+      id: number;
+      tanggal_transaksi: string;
+      tipe: 'masuk' | 'keluar';
+      nominal: string;
+      keterangan: string | null;
+      status: string;
+      bendahara: {id: number; name: string} | null;
+    }[];
+  } | null;
   asrama_aktif: {
     kamar_id: number;
     nama_kamar: string;
@@ -74,7 +87,61 @@ export type SantriDetail = Omit<Santri, 'asrama_aktif'> & {
     nama_lengkap: string;
     hubungan: LabeledValue;
     no_hp: string | null;
+    nik: string | null;
+    pekerjaan: string | null;
+    email: string | null;
     is_utama: boolean;
+  }[];
+  kelas_santri: {
+    id: number;
+    status: string;
+    tahun_ajaran: {id: number; nama: string};
+    kelas: {
+      id: number;
+      nama: string;
+      tingkat: string;
+      wali_kelas: {id: number; name: string} | null;
+    };
+  }[];
+  tagihan: {
+    id: number;
+    nama: string;
+    nominal: string;
+    nominal_terbayar: string;
+    tanggal_jatuh_tempo: string;
+    status: string;
+  }[];
+  hafalan_setoran: {
+    id: number;
+    tanggal: string;
+    jenis: string;
+    surah_mulai: number;
+    ayat_mulai: number;
+    surah_selesai: number;
+    ayat_selesai: number;
+    halaman_mulai: number | null;
+    halaman_selesai: number | null;
+    kualitas: string;
+    ustadz: {id: number; name: string} | null;
+    catatan: string | null;
+  }[];
+  absensi: {
+    id: number;
+    tanggal: string;
+    jenis: string;
+    status: string;
+    pencatat: {id: number; name: string} | null;
+    keterangan: string | null;
+  }[];
+  poin_santri: {id: number; tahun_ajaran_id: number; poin_awal: number; poin_sisa: number}[];
+  pelanggaran: {
+    id: number;
+    tanggal: string;
+    jenis_pelanggaran: {id: number; nama: string; kategori: string};
+    poin: number;
+    pencatat: {id: number; name: string} | null;
+    catatan: string | null;
+    status: string;
   }[];
 };
 

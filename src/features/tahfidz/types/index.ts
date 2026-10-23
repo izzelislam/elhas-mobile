@@ -56,3 +56,34 @@ export type RingkasanResponse = {
   message: string;
   data: Ringkasan;
 };
+
+export type TargetHafalan = {
+  id: number;
+  tahun_ajaran: {id: number; nama: string};
+  is_aktif: boolean;
+  target_juz: number;
+  tercapai_juz: number;
+  catatan: string | null;
+};
+
+export type DetailHafalanSantri = {
+  santri: {id: number; nama_lengkap: string; nis: string};
+  periode: {
+    tahun: number;
+    bulan: number;
+    tanggal_mulai: string;
+    tanggal_selesai: string;
+    sebelumnya: string; // YYYY-MM
+    berikutnya: string; // YYYY-MM
+  };
+  target_aktif: TargetHafalan | null;
+  riwayat_target: TargetHafalan[];
+  ringkasan_bulan: {jumlah_setoran: number; setoran_baru: number};
+  setoran_bulan: Setoran[];
+};
+
+export type DetailHafalanSantriResponse = {
+  success: boolean;
+  message: string;
+  data: DetailHafalanSantri;
+};
