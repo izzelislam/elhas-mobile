@@ -5,6 +5,7 @@ import {ArrowLeft, ClipboardCheck, Plus, Search, SlidersHorizontal, X} from 'luc
 import {Avatar} from '@/components/ui/Avatar';
 import {Button} from '@/components/ui/Button';
 import {Card} from '@/components/ui/Card';
+import {useCan} from '@/lib/permissions';
 import {colors} from '@/theme';
 import {describeError} from '@/lib/errors';
 import {toast} from '@/store/toast.store';
@@ -91,6 +92,7 @@ export default function MutabaahSantriScreen({
   onSelect: (item: RekapSantri, params: Omit<RekapParams, 'santri_id'>) => void;
   variant?: MutabaahVariant;
 }) {
+  const canCreate = useCan('mutabaah_santri.input');
   const insets = useSafeAreaInsets();
   const [data, setData] = useState<Rekap | null>(null);
   const [loading, setLoading] = useState(true);
@@ -243,6 +245,7 @@ export default function MutabaahSantriScreen({
         />
       )}
 
+      {canCreate ? (
       <Pressable
         onPress={onCreate}
         style={{bottom: insets.bottom + 20}}
@@ -250,6 +253,7 @@ export default function MutabaahSantriScreen({
         accessibilityLabel="Input mutabaah">
         <Plus size={26} color={colors.brand.foreground} />
       </Pressable>
+      ) : null}
       <RekapFilterSheet
         visible={sheet}
         value={filter}

@@ -3,6 +3,7 @@ import {ActivityIndicator, FlatList, Pressable, Text, TextInput, View} from 'rea
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {ArrowLeft, BookOpenCheck, Plus, Search, SlidersHorizontal, X} from 'lucide-react-native';
 import {Button} from '@/components/ui/Button';
+import {useCan} from '@/lib/permissions';
 import {colors} from '@/theme';
 import {toast} from '@/store/toast.store';
 import {
@@ -24,6 +25,7 @@ export default function SetoranScreen({
   onBack: () => void;
   onCreate: () => void;
 }) {
+  const canCreate = useCan('hafalan.create');
   const insets = useSafeAreaInsets();
   const [items, setItems] = useState<Setoran[]>([]);
   const [total, setTotal] = useState(0);
@@ -205,6 +207,7 @@ export default function SetoranScreen({
         />
       )}
 
+      {canCreate ? (
       <Pressable
         onPress={onCreate}
         style={{bottom: insets.bottom + 20}}
@@ -212,6 +215,7 @@ export default function SetoranScreen({
         accessibilityLabel="Catat setoran">
         <Plus size={26} color={colors.brand.foreground} />
       </Pressable>
+      ) : null}
       <SetoranFilterSheet
         visible={sheet}
         value={filter}

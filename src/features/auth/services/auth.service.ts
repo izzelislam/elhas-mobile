@@ -10,3 +10,8 @@ export async function getMe(): Promise<AuthUser> {
   const {data} = await http.get<MeResponse>('/auth/me');
   return data.data;
 }
+
+/** Mencabut token di server. */
+export async function logoutRequest() {
+  await http.post('/auth/logout');
+}

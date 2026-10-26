@@ -10,6 +10,7 @@ import Svg, {Path} from 'react-native-svg';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Bell} from 'lucide-react-native';
 import {MENU} from '@/navigation/menu.config';
+import {filterMenu} from '@/navigation/menu.access';
 import {useAuthStore} from '@/store/auth.store';
 import {Avatar} from '@/components/ui/Avatar';
 import {MenuTile} from '@/components/ui/MenuTile';
@@ -21,10 +22,8 @@ import {
   getInformasiList,
 } from '@/features/informasi/services/informasi.service';
 import {InformasiImage} from '@/features/informasi/components/InformasiImage';
+import {getUnreadCount} from '@/features/notifikasi/services/notifikasi.service';
 import type {MenuItem} from '@/navigation/menu.types';
-
-// TODO: ganti dengan jumlah notifikasi belum dibaca dari API/store
-const NOTIF_COUNT = 3;
 
 const INSTITUTION = 'Pondok Pesantren Elhas';
 
@@ -43,7 +42,14 @@ export default function DashboardScreen({
   };
   const [sheetMenu, setSheetMenu] = useState<MenuItem | null>(null);
   const [informasi, setInformasi] = useState<Informasi[]>([]);
+  const [notifCount, setNotifCount] = useState(0);
   const [informasiLoading, setInformasiLoading] = useState(true);
+
+  useEffect(() => {
+    getUnreadCount()
+      .then(setNotifCount)
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     getInformasiList({per_page: 5})
@@ -59,7 +65,7 @@ export default function DashboardScreen({
       onNavigate?.(item.route);
     }
   };
-  const items = MENU.filter(m => MENU_VISUAL[m.key]);
+  const items = filterMenu(MENU, authUser).filter(m => MENU_VISUAL[m.key]);
 
   return (
     <ScrollView
@@ -71,9 +77,12 @@ export default function DashboardScreen({
         className="bg-brand px-5 pb-6"
       >
         <View className="flex-row justify-end">
-          <Pressable hitSlop={10} className="active:opacity-70">
+          <Pressable
+            onPress={() => onNavigate?.('Notifikasi')}
+            hitSlop={10}
+            className="active:opacity-70">
             <Bell size={22} color={colors.brand.foreground} />
-            {NOTIF_COUNT > 0 ? (
+            {notifCount > 0 ? (
               <View className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-icon border border-brand bg-destructive" />
             ) : null}
           </Pressable>

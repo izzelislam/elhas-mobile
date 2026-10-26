@@ -7,7 +7,7 @@ import {BottomSheet} from '@/components/ui/BottomSheet';
 import {Card} from '@/components/ui/Card';
 import {describeError} from '@/lib/errors';
 import {dialog} from '@/store/dialog.store';
-import {useAuthStore} from '@/store/auth.store';
+import {useCan} from '@/lib/permissions';
 import {toast} from '@/store/toast.store';
 import {colors} from '@/theme';
 import {rupiah} from '../components/format';
@@ -57,7 +57,7 @@ export default function TagihanDetailScreen({
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
-  const isWali = useAuthStore(s => s.user?.roles.some(r => /wali/i.test(r)) ?? false);
+  const canVerify = useCan('tagihan.edit');
   const [tolak, setTolak] = useState<Pembayaran | null>(null);
   const [alasan, setAlasan] = useState('');
   const [alasanError, setAlasanError] = useState('');
@@ -271,7 +271,7 @@ export default function TagihanDetailScreen({
                       </View>
                     ) : null}
 
-                    {p.status === 'pending' && !isWali ? (
+                    {p.status === 'pending' && canVerify ? (
                       <View className="mt-4 flex-row gap-3">
                         <View className="flex-1">
                           <Button

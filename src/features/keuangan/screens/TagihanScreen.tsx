@@ -5,7 +5,7 @@ import {ArrowLeft, Receipt, Search, Wallet, SlidersHorizontal, X} from 'lucide-r
 import {Avatar} from '@/components/ui/Avatar';
 import {Button} from '@/components/ui/Button';
 import {Card} from '@/components/ui/Card';
-import {useAuthStore} from '@/store/auth.store';
+import {useCan, useIsWali} from '@/lib/permissions';
 import {toast} from '@/store/toast.store';
 import {colors} from '@/theme';
 import {PilihTagihanSheet} from '../components/PilihTagihanSheet';
@@ -23,9 +23,6 @@ import TagihanDetailScreen from './TagihanDetailScreen';
 
 const PER_PAGE = 15;
 
-// Tombol bayar untuk wali; sementara tampil juga di mode debug (__DEV__) untuk pengujian.
-const SHOW_BAYAR_FOR_ALL = __DEV__;
-
 const dateShort = (v: string) =>
   new Date(v).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'});
 
@@ -41,7 +38,10 @@ export default function TagihanScreen({onBack}: {onBack: () => void}) {
   const [filter, setFilter] = useState<TagihanFilter>(EMPTY_TAGIHAN_FILTER);
   const [sheet, setSheet] = useState(false);
   const [selected, setSelected] = useState<Tagihan | null>(null);
-  const isWali = useAuthStore(s => s.user?.roles.some(r => /wali/i.test(r)) ?? false);
+  // Wali membayar tagihan santrinya; petugas mencatat pembayaran bila punya izin membuat tagihan.
+  const isWali = useIsWali();
+  const canCatat = useCan('tagihan.create');
+  const canBayar = isWali || canCatat;
   const [pilih, setPilih] = useState(false);
   const [bayar, setBayar] = useState<Tagihan | null>(null);
   const [version, setVersion] = useState(0); // naik setelah pembayaran agar detail dan daftar dimuat ulang
@@ -270,7 +270,7 @@ export default function TagihanScreen({onBack}: {onBack: () => void}) {
         />
       )}
 
-      {isWali || SHOW_BAYAR_FOR_ALL ? (
+      {canBayar ? (
         <Pressable
           onPress={() => setPilih(true)}
           style={{bottom: insets.bottom + 20}}

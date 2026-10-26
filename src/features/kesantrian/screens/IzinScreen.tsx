@@ -7,8 +7,8 @@ import {Avatar} from '@/components/ui/Avatar';
 import {BottomSheet} from '@/components/ui/BottomSheet';
 import {Button} from '@/components/ui/Button';
 import {Card} from '@/components/ui/Card';
+import {useCan} from '@/lib/permissions';
 import {colors} from '@/theme';
-import {useAuthStore} from '@/store/auth.store';
 import {dialog} from '@/store/dialog.store';
 import {toast} from '@/store/toast.store';
 import {
@@ -122,6 +122,7 @@ export default function IzinScreen({
   onBack: () => void;
   onCreate: () => void;
 }) {
+  const canCreate = useCan('izin.create');
   const insets = useSafeAreaInsets();
   const [items, setItems] = useState<Izin[]>([]);
   const [total, setTotal] = useState(0);
@@ -136,7 +137,7 @@ export default function IzinScreen({
   const requestId = useRef(0);
   const [filter, setFilter] = useState<IzinFilter>(EMPTY_IZIN_FILTER);
   const [sheet, setSheet] = useState(false);
-  const canAct = useAuthStore(s => !!s.user?.permissions.includes('izin.approve'));
+  const canAct = useCan('izin.approve');
   const [actingId, setActingId] = useState<number | null>(null);
   const [rejectTarget, setRejectTarget] = useState<Izin | null>(null);
   const [alasan, setAlasan] = useState('');
@@ -404,6 +405,7 @@ export default function IzinScreen({
         onClose={() => setSheet(false)}
         onApply={setFilter}
       />
+      {canCreate ? (
       <Pressable
         onPress={onCreate}
         style={{bottom: insets.bottom + 20}}
@@ -411,6 +413,7 @@ export default function IzinScreen({
         accessibilityLabel="Ajukan izin">
         <Plus size={26} color={colors.brand.foreground} />
       </Pressable>
+      ) : null}
     </View>
   );
 }

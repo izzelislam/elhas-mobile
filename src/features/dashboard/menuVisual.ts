@@ -1,5 +1,6 @@
 import {
   Banknote,
+  Fingerprint,
   BedDouble,
   Building2,
   DoorOpen,
@@ -37,6 +38,7 @@ export const MENU_VISUAL: Record<string, {icon: LucideIcon; tint: TintName}> = {
   santri: {icon: Users, tint: 'green'},
   akademik: {icon: GraduationCap, tint: 'blue'},
   kesantrian: {icon: ClipboardCheck, tint: 'sky'},
+  'absensi-asatidzah': {icon: UserCheck, tint: 'blue'},
   asrama: {icon: BedDouble, tint: 'teal'},
   tahfidz: {icon: BookOpenCheck, tint: 'purple'},
   mutabaah: {icon: CalendarCheck, tint: 'orange'},
@@ -48,6 +50,9 @@ export const MENU_VISUAL: Record<string, {icon: LucideIcon; tint: TintName}> = {
 /** Ikon sub menu (key mengacu ke children di navigation/menu.config.ts); warna mengikuti menu induk */
 export const SUBMENU_ICON: Record<string, LucideIcon> = {
   absensi: UserCheck,
+  absen: Fingerprint,
+  'absensi-asatidzah-list': ClipboardList,
+  'absensi-asatidzah-rekap': ChartColumn,
   jadwal: CalendarClock,
   nilai: ClipboardList,
   rapor: FileText,

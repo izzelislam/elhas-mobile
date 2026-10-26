@@ -7,6 +7,7 @@ import {Button} from '@/components/ui/Button';
 import {Card} from '@/components/ui/Card';
 import {describeError} from '@/lib/errors';
 import {toast} from '@/store/toast.store';
+import {useCan} from '@/lib/permissions';
 import {colors} from '@/theme';
 import {rupiah} from '../components/format';
 import {getTabunganDetail} from '../services/tabungan.service';
@@ -54,6 +55,7 @@ export default function TabunganDetailScreen({
   onTransaksi: (t: TabunganDetail) => void;
   onRiwayat: (tipe: 'semua' | 'keluar') => void;
 }) {
+  const canTransact = useCan('tabungan.create');
   const insets = useSafeAreaInsets();
   const [data, setData] = useState<TabunganDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -248,7 +250,7 @@ export default function TabunganDetailScreen({
               </Card>
             )}
           </ScrollView>
-          {data.can_transact ? (
+          {data.can_transact && canTransact ? (
             <View
               style={{bottom: insets.bottom + 16}}
               className="absolute left-5 right-5 rounded-card shadow-lg">

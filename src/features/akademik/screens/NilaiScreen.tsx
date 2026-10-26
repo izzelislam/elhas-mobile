@@ -22,6 +22,7 @@ import {Button} from '@/components/ui/Button';
 import {Card} from '@/components/ui/Card';
 import {getCachedReferensi} from '@/features/santri/services/referensi.service';
 import {toast} from '@/store/toast.store';
+import {useCan} from '@/lib/permissions';
 import {colors} from '@/theme';
 import {
   EMPTY_NILAI_FILTER,
@@ -42,6 +43,7 @@ const scoreColor = (n: number) =>
 const cap = (v: string) => v.charAt(0).toUpperCase() + v.slice(1);
 
 export default function NilaiScreen({onBack}: {onBack: () => void}) {
+  const canCreate = useCan('nilai.create');
   const insets = useSafeAreaInsets();
   const [items, setItems] = useState<Nilai[]>([]);
   const [total, setTotal] = useState(0);
@@ -362,6 +364,7 @@ export default function NilaiScreen({onBack}: {onBack: () => void}) {
           }}
         />
       )}
+      {canCreate ? (
       <Pressable
         onPress={() => setForm(true)}
         style={{bottom: insets.bottom + 20}}
@@ -370,6 +373,7 @@ export default function NilaiScreen({onBack}: {onBack: () => void}) {
       >
         <Plus size={26} color={colors.brand.foreground} />
       </Pressable>
+      ) : null}
       <NilaiFilterSheet
         visible={sheet}
         value={filter}

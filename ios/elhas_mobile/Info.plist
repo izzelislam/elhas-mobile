@@ -35,7 +35,9 @@
 		<true/>
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
+	<string>Lokasi digunakan untuk memverifikasi absensi di area pesantren.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Kamera digunakan untuk foto absensi.</string>
 	<key>RCTNewArchEnabled</key>
 	<true/>
 	<key>UIApplicationSceneManifest</key>

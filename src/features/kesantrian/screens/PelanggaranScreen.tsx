@@ -5,6 +5,7 @@ import {ArrowLeft, Plus, Search, ShieldAlert, SlidersHorizontal, X} from 'lucide
 import {Avatar} from '@/components/ui/Avatar';
 import {Button} from '@/components/ui/Button';
 import {Card} from '@/components/ui/Card';
+import {useCan} from '@/lib/permissions';
 import {colors} from '@/theme';
 import {toast} from '@/store/toast.store';
 import {
@@ -75,6 +76,7 @@ export default function PelanggaranScreen({
   onSelect: (item: Pelanggaran) => void;
   onCreate: () => void;
 }) {
+  const canCreate = useCan('pelanggaran.create');
   const insets = useSafeAreaInsets();
   const [items, setItems] = useState<Pelanggaran[]>([]);
   const [total, setTotal] = useState(0);
@@ -275,6 +277,7 @@ export default function PelanggaranScreen({
           }
         />
       )}
+      {canCreate ? (
       <Pressable
         onPress={onCreate}
         style={{bottom: insets.bottom + 20}}
@@ -282,6 +285,7 @@ export default function PelanggaranScreen({
         accessibilityLabel="Catat pelanggaran">
         <Plus size={26} color={colors.brand.foreground} />
       </Pressable>
+      ) : null}
       <PelanggaranFilterSheet
         visible={sheet}
         value={filter}

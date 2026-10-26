@@ -3,6 +3,7 @@ import {ScrollView, Text, View} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {
   Bell,
+  Bug,
   Info,
   KeyRound,
   LogOut,
@@ -13,7 +14,9 @@ import {Card} from '@/components/ui/Card';
 import {Avatar} from '@/components/ui/Avatar';
 import {dialog} from '@/store/dialog.store';
 import {useAuthStore} from '@/store/auth.store';
+import {logoutRequest} from '@/features/auth/services/auth.service';
 import {ListRow} from '../components/ListRow';
+import DebugAksesScreen from './DebugAksesScreen';
 import PengaturanScopeScreen from './PengaturanScopeScreen';
 import TemaWarnaScreen from './TemaWarnaScreen';
 import UbahPasswordScreen from './UbahPasswordScreen';
@@ -31,7 +34,7 @@ export default function AkunScreen() {
       '',
     avatar: authUser?.foto ?? undefined,
   };
-  const [page, setPage] = useState<'main' | 'password' | 'scope' | 'tema'>(
+  const [page, setPage] = useState<'main' | 'password' | 'scope' | 'tema' | 'akses'>(
     'main',
   );
 
@@ -41,6 +44,10 @@ export default function AkunScreen() {
 
   if (page === 'tema') {
     return <TemaWarnaScreen onBack={() => setPage('main')} />;
+  }
+
+  if (page === 'akses') {
+    return <DebugAksesScreen onBack={() => setPage('main')} />;
   }
 
   if (page === 'scope') {
@@ -53,7 +60,13 @@ export default function AkunScreen() {
       message: 'Anda harus masuk kembali untuk mengakses akun ini.',
       variant: 'destructive',
       confirmText: 'Keluar',
-      onConfirm: logout,
+      onConfirm: async () => {
+        // Cabut token di server; sesi lokal tetap dihapus walau request gagal (mis. offline atau token sudah kedaluwarsa).
+        try {
+          await logoutRequest();
+        } catch {}
+        logout();
+      },
     });
 
   return (
@@ -103,6 +116,17 @@ export default function AkunScreen() {
           <ListRow label="Notifikasi" icon={Bell} tint="orange" />
           <View className="ml-16 h-px bg-line" />
           <ListRow label="Tentang Aplikasi" icon={Info} tint="gray" />
+          {__DEV__ ? (
+            <>
+              <View className="ml-16 h-px bg-line" />
+              <ListRow
+                label="Debug Hak Akses"
+                icon={Bug}
+                tint="pink"
+                onPress={() => setPage('akses')}
+              />
+            </>
+          ) : null}
         </Card>
         <Card className="mt-4 overflow-hidden p-0">
           <ListRow

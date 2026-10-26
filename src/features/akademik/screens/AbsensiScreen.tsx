@@ -25,6 +25,7 @@ import {Button} from '@/components/ui/Button';
 import {Card} from '@/components/ui/Card';
 import {getCachedReferensi} from '@/features/santri/services/referensi.service';
 import {toast} from '@/store/toast.store';
+import {useCan} from '@/lib/permissions';
 import {colors} from '@/theme';
 import {
   AbsensiFilter,
@@ -55,6 +56,7 @@ const dateLong = (v: string) =>
   });
 
 export default function AbsensiScreen({onBack}: {onBack: () => void}) {
+  const canCreate = useCan('absensi.create');
   const insets = useSafeAreaInsets();
   const [items, setItems] = useState<Absensi[]>([]);
   const [total, setTotal] = useState(0);
@@ -393,6 +395,7 @@ export default function AbsensiScreen({onBack}: {onBack: () => void}) {
           }}
         />
       )}
+      {canCreate ? (
       <Pressable
         onPress={() => setForm(true)}
         style={{bottom: insets.bottom + 20}}
@@ -401,6 +404,7 @@ export default function AbsensiScreen({onBack}: {onBack: () => void}) {
       >
         <Plus size={26} color={colors.brand.foreground} />
       </Pressable>
+      ) : null}
       <AbsensiFilterSheet
         visible={sheet}
         value={filter}
