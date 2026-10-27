@@ -1,8 +1,9 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   ActivityIndicator,
   ScrollView,
   Pressable,
+  RefreshControl,
   Text,
   View,
 } from 'react-native';
@@ -12,16 +13,21 @@ import {Bell} from 'lucide-react-native';
 import {MENU} from '@/navigation/menu.config';
 import {filterMenu} from '@/navigation/menu.access';
 import {useAuthStore} from '@/store/auth.store';
+import {
+  DASHBOARD_STALE_MS,
+  useDashboardStore,
+} from '@/store/dashboard.store';
+import {getMe} from '@/features/auth/services/auth.service';
+import {useIsWali} from '@/lib/permissions';
+import {getSantriList} from '@/features/santri/services/santri.service';
 import {Avatar} from '@/components/ui/Avatar';
 import {MenuTile} from '@/components/ui/MenuTile';
 import {colors} from '@/theme';
 import {MENU_VISUAL} from '../menuVisual';
 import {SubMenuSheet} from '../components/SubMenuSheet';
-import {
-  Informasi,
-  getInformasiList,
-} from '@/features/informasi/services/informasi.service';
+import {getInformasiList} from '@/features/informasi/services/informasi.service';
 import {InformasiImage} from '@/features/informasi/components/InformasiImage';
+import {refreshDevice} from '@/features/notifikasi/services/push.service';
 import {getUnreadCount} from '@/features/notifikasi/services/notifikasi.service';
 import type {MenuItem} from '@/navigation/menu.types';
 
@@ -29,34 +35,100 @@ const INSTITUTION = 'Pondok Pesantren Elhas';
 
 export default function DashboardScreen({
   onNavigate,
+  onOpenSantri,
 }: {
   onNavigate?: (route: string) => void;
+  /** Dipanggil saat header santri (khusus wali) diketuk. */
+  onOpenSantri?: (id: number) => void;
 }) {
   const insets = useSafeAreaInsets();
   const authUser = useAuthStore(s => s.user);
-  const USER = {
-    institution: INSTITUTION,
-    name: authUser?.name ?? '-',
-    subtitle: authUser?.jabatan ?? authUser?.roles[0]?.replace(/_/g, ' ') ?? '',
-    avatar: authUser?.foto ?? undefined,
-  };
+  const isWali = useIsWali();
+  const anak = useDashboardStore(s => s.anak);
+  // Wali melihat santrinya di header; data akun wali cukup di halaman Akun.
+  const santri = isWali ? anak[0] : undefined;
+  const USER = santri
+    ? {
+        institution: INSTITUTION,
+        name: santri.nama_lengkap,
+        subtitle: [
+          santri.kelas_aktif?.nama,
+          anak.length > 1 ? `+${anak.length - 1} santri lainnya` : null,
+        ]
+          .filter(Boolean)
+          .join(' · '),
+        avatar: santri.foto ?? undefined,
+      }
+    : {
+        institution: INSTITUTION,
+        name: authUser?.name ?? '-',
+        subtitle:
+          authUser?.jabatan ?? authUser?.roles[0]?.replace(/_/g, ' ') ?? '',
+        avatar: authUser?.foto ?? undefined,
+      };
   const [sheetMenu, setSheetMenu] = useState<MenuItem | null>(null);
-  const [informasi, setInformasi] = useState<Informasi[]>([]);
-  const [notifCount, setNotifCount] = useState(0);
-  const [informasiLoading, setInformasiLoading] = useState(true);
+  const informasi = useDashboardStore(s => s.informasi);
+  const notifCount = useDashboardStore(s => s.notifCount);
+  const informasiLoading = useDashboardStore(s => !s.loaded);
+
+  const setUser = useAuthStore(s => s.setUser);
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Badge notifikasi selalu disegarkan diam-diam; data lain hanya dimuat bila belum ada, sudah usang, atau `force`.
+  const load = useCallback(
+    async (force = false) => {
+      const store = useDashboardStore.getState();
+      const fresh =
+        store.fetchedAt !== null &&
+        Date.now() - store.fetchedAt < DASHBOARD_STALE_MS;
+      let ok = true;
+      const fail = () => {
+        ok = false;
+      };
+      await Promise.all([
+        getUnreadCount()
+          .then(n => store.set({notifCount: n}))
+          .catch(() => {}),
+        !force && fresh
+          ? null
+          : isWali
+          ? getSantriList({status: 'aktif'})
+              .then(res => store.set({anak: res.data}))
+              .catch(fail)
+          : null,
+        !force && fresh
+          ? null
+          : getInformasiList({per_page: 5})
+              .then(res =>
+                store.set({
+                  informasi: res.data.filter(i => i.status === 'published'),
+                }),
+              )
+              .catch(fail),
+      ]);
+      if (!(!force && fresh)) {
+        store.set({loaded: true, fetchedAt: ok ? Date.now() : null});
+      }
+    },
+    [isWali],
+  );
 
   useEffect(() => {
-    getUnreadCount()
-      .then(setNotifCount)
-      .catch(() => {});
-  }, []);
+    load();
+  }, [load]);
 
-  useEffect(() => {
-    getInformasiList({per_page: 5})
-      .then(res => setInformasi(res.data.filter(i => i.status === 'published')))
-      .catch(() => {})
-      .finally(() => setInformasiLoading(false));
-  }, []);
+  // Tarik layar: muat ulang data beranda dan perbarui peran/hak akses dan topic push dari server.
+  const refresh = async () => {
+    setRefreshing(true);
+    await Promise.all([
+      load(true),
+      getMe()
+        .then(setUser)
+        .catch(() => {}),
+      refreshDevice(),
+    ]);
+    setRefreshing(false);
+  };
 
   const open = (item: MenuItem) => {
     if (item.children?.length) {
@@ -71,6 +143,9 @@ export default function DashboardScreen({
     <ScrollView
       className="flex-1 bg-surface"
       showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={refresh} />
+      }
     >
       <View
         style={{paddingTop: insets.top + 12}}
@@ -87,7 +162,10 @@ export default function DashboardScreen({
             ) : null}
           </Pressable>
         </View>
-        <View className="mt-4 flex-row items-center justify-between">
+        <Pressable
+          disabled={!santri}
+          onPress={() => santri && onOpenSantri?.(santri.id)}
+          className="mt-4 flex-row items-center justify-between active:opacity-80">
           <View className="flex-1 pr-4">
             <Text className="text-body text-brand-foreground opacity-90">
               {USER.institution}
@@ -100,7 +178,7 @@ export default function DashboardScreen({
             </Text>
           </View>
           <Avatar uri={USER.avatar} />
-        </View>
+        </Pressable>
       </View>
       <Svg
         width="100%"

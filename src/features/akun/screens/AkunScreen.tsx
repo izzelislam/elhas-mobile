@@ -3,7 +3,6 @@ import {ScrollView, Text, View} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {
   Bell,
-  Bug,
   Info,
   KeyRound,
   LogOut,
@@ -13,18 +12,21 @@ import {
 import {Card} from '@/components/ui/Card';
 import {Avatar} from '@/components/ui/Avatar';
 import {dialog} from '@/store/dialog.store';
+import {useIsWali} from '@/lib/permissions';
 import {useAuthStore} from '@/store/auth.store';
 import {logoutRequest} from '@/features/auth/services/auth.service';
+import {teardownPush} from '@/features/notifikasi/services/push.service';
 import {ListRow} from '../components/ListRow';
-import DebugAksesScreen from './DebugAksesScreen';
 import PengaturanScopeScreen from './PengaturanScopeScreen';
 import TemaWarnaScreen from './TemaWarnaScreen';
+import TentangAplikasiScreen from './TentangAplikasiScreen';
 import UbahPasswordScreen from './UbahPasswordScreen';
 
 export default function AkunScreen() {
   const insets = useSafeAreaInsets();
   const logout = useAuthStore(s => s.logout);
   const authUser = useAuthStore(s => s.user);
+  const isWali = useIsWali();
   const USER = {
     name: authUser?.name ?? '-',
     subtitle:
@@ -34,7 +36,7 @@ export default function AkunScreen() {
       '',
     avatar: authUser?.foto ?? undefined,
   };
-  const [page, setPage] = useState<'main' | 'password' | 'scope' | 'tema' | 'akses'>(
+  const [page, setPage] = useState<'main' | 'password' | 'scope' | 'tema' | 'tentang'>(
     'main',
   );
 
@@ -46,8 +48,8 @@ export default function AkunScreen() {
     return <TemaWarnaScreen onBack={() => setPage('main')} />;
   }
 
-  if (page === 'akses') {
-    return <DebugAksesScreen onBack={() => setPage('main')} />;
+  if (page === 'tentang') {
+    return <TentangAplikasiScreen onBack={() => setPage('main')} />;
   }
 
   if (page === 'scope') {
@@ -62,6 +64,7 @@ export default function AkunScreen() {
       confirmText: 'Keluar',
       onConfirm: async () => {
         // Cabut token di server; sesi lokal tetap dihapus walau request gagal (mis. offline atau token sudah kedaluwarsa).
+        await teardownPush();
         try {
           await logoutRequest();
         } catch {}
@@ -99,13 +102,17 @@ export default function AkunScreen() {
             onPress={() => setPage('password')}
           />
           <View className="ml-16 h-px bg-line" />
-          <ListRow
-            label="Unit & Kelas"
-            icon={School}
-            tint="green"
-            onPress={() => setPage('scope')}
-          />
-          <View className="ml-16 h-px bg-line" />
+          {isWali ? null : (
+            <>
+              <ListRow
+                label="Unit & Kelas"
+                icon={School}
+                tint="green"
+                onPress={() => setPage('scope')}
+              />
+              <View className="ml-16 h-px bg-line" />
+            </>
+          )}
           <ListRow
             label="Tema Warna"
             icon={Palette}
@@ -115,18 +122,12 @@ export default function AkunScreen() {
           <View className="ml-16 h-px bg-line" />
           <ListRow label="Notifikasi" icon={Bell} tint="orange" />
           <View className="ml-16 h-px bg-line" />
-          <ListRow label="Tentang Aplikasi" icon={Info} tint="gray" />
-          {__DEV__ ? (
-            <>
-              <View className="ml-16 h-px bg-line" />
-              <ListRow
-                label="Debug Hak Akses"
-                icon={Bug}
-                tint="pink"
-                onPress={() => setPage('akses')}
-              />
-            </>
-          ) : null}
+          <ListRow
+            label="Tentang Aplikasi"
+            icon={Info}
+            tint="gray"
+            onPress={() => setPage('tentang')}
+          />
         </Card>
         <Card className="mt-4 overflow-hidden p-0">
           <ListRow
@@ -137,7 +138,7 @@ export default function AkunScreen() {
           />
         </Card>
         <Text className="mt-5 text-center text-caption text-ink-muted">
-          Elhas Mobile v0.0.1
+          elhamobile v0.0.1
         </Text>
       </View>
     </ScrollView>

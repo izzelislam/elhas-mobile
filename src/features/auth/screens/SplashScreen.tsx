@@ -23,9 +23,10 @@ export default function SplashScreen({onFinish}: {onFinish: () => void}) {
         }}
         className="items-center">
         <Logo size={104} />
-        <Text className="mt-5 text-heading text-brand-foreground">Elhas Mobile</Text>
-        <Text className="mt-1 text-body text-brand-foreground opacity-80">
-          Pondok Pesantren Elhas
+        <Text className="mt-5 text-heading text-brand-foreground">elhamobile</Text>
+        <Text className="mt-1 px-10 text-center text-body text-brand-foreground opacity-80">
+          Pondok Pesantren{'\n'}
+          <Text className="font-bold">Tahfidzul Qur'an Lukman Al-Hakim</Text>
         </Text>
       </Animated.View>
       <Text className="absolute bottom-10 text-caption text-brand-foreground opacity-60">

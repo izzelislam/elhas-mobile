@@ -63,7 +63,7 @@ export default function LoginScreen() {
           <View className="absolute -right-16 -top-10 h-56 w-56 rounded-icon bg-white/10" />
           <View className="absolute -left-20 top-24 h-44 w-44 rounded-icon bg-white/10" />
           <Logo size={88} />
-          <Text className="mt-4 text-heading text-brand-foreground">Elhas Mobile</Text>
+          <Text className="mt-4 text-heading text-brand-foreground">elhamobile</Text>
           <Text className="mt-1 text-body text-brand-foreground opacity-80">
             Pondok Pesantren Elhas
           </Text>
@@ -115,7 +115,7 @@ export default function LoginScreen() {
           <Text className="text-caption text-ink-muted">
             Butuh bantuan? Hubungi admin sekolah
           </Text>
-          <Text className="mt-1 text-caption text-ink-muted">Elhas Mobile v0.0.1</Text>
+          <Text className="mt-1 text-caption text-ink-muted">elhamobile v0.0.1</Text>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>

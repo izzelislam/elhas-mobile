@@ -66,8 +66,8 @@ export const MENU: MenuItem[] = [
     label: 'Keuangan',
     children: [
       {key: 'tabungan', label: 'Tabungan', route: 'Tabungan', permission: 'tabungan.view'},
-      {key: 'tarik-tabungan', label: 'Setor / Tarik', route: 'TarikTabungan', permission: 'tabungan.create'},
-      {key: 'tagihan', label: 'Tagihan', route: 'Tagihan', permission: 'tagihan.view'},
+      {key: 'tarik-tabungan', label: 'Setor / Tarik', route: 'TarikTabungan', permission: 'tabungan.create', hideForWali: true},
+      {key: 'tagihan', label: 'Tagihan', route: 'Tagihan', permission: ['tagihan.view', 'spp.view']},
     ],
   },
   {key: 'aduan', label: 'Aduan', route: 'Aduan'},

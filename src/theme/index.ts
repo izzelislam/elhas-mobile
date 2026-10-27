@@ -6,10 +6,15 @@ export {themes};
 export type {Theme};
 export type TintName = keyof typeof baseColors.tint;
 
-let active: Theme = themes[0];
+/** Tema bawaan untuk pengguna yang belum memilih (Hijau Zamrud). */
+export const DEFAULT_THEME_ID = 'hijau';
+
+const fallback = themes.find(t => t.id === DEFAULT_THEME_ID) ?? themes[0];
+
+let active: Theme = fallback;
 
 export const getTheme = (id: string): Theme =>
-  themes.find(t => t.id === id) ?? themes[0];
+  themes.find(t => t.id === id) ?? fallback;
 
 /** Dipanggil store tema; `colors.brand` langsung mengikuti tema aktif. */
 export const setActiveTheme = (id: string) => {

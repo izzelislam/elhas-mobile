@@ -1,7 +1,7 @@
 import {create} from 'zustand';
 import {createJSONStorage, persist} from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {setActiveTheme} from '@/theme';
+import {DEFAULT_THEME_ID, setActiveTheme} from '@/theme';
 
 type AppState = {
   onboardingDone: boolean;
@@ -15,7 +15,7 @@ export const useAppStore = create<AppState>()(
     set => ({
       onboardingDone: false,
       finishOnboarding: () => set({onboardingDone: true}),
-      themeId: 'biru',
+      themeId: DEFAULT_THEME_ID,
       setTheme: id => {
         setActiveTheme(id);
         set({themeId: id});

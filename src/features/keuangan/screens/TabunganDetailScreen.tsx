@@ -7,7 +7,7 @@ import {Button} from '@/components/ui/Button';
 import {Card} from '@/components/ui/Card';
 import {describeError} from '@/lib/errors';
 import {toast} from '@/store/toast.store';
-import {useCan} from '@/lib/permissions';
+import {useCan, useIsWali} from '@/lib/permissions';
 import {colors} from '@/theme';
 import {rupiah} from '../components/format';
 import {getTabunganDetail} from '../services/tabungan.service';
@@ -55,7 +55,10 @@ export default function TabunganDetailScreen({
   onTransaksi: (t: TabunganDetail) => void;
   onRiwayat: (tipe: 'semua' | 'keluar') => void;
 }) {
-  const canTransact = useCan('tabungan.create');
+  // Wali hanya melihat tabungan; setor/tarik dicatat oleh petugas.
+  const canCreate = useCan('tabungan.create');
+  const isWali = useIsWali();
+  const canTransact = canCreate && !isWali;
   const insets = useSafeAreaInsets();
   const [data, setData] = useState<TabunganDetail | null>(null);
   const [loading, setLoading] = useState(true);

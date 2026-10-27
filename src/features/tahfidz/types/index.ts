@@ -5,6 +5,14 @@ export type Halaqah = {
   jumlah_santri: number;
 };
 
+export type HalaqahDetail = {
+  id: number;
+  nama: string;
+  musyrif: {id: number; name: string; nip: string | null} | null;
+  tahun_ajaran: {id: number; nama: string} | null;
+  santri: {id: number; nama_lengkap: string; nis: string}[];
+};
+
 export type HalaqahListResponse = {
   success: boolean;
   message: string;

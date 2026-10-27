@@ -9,4 +9,6 @@ export type MenuItem = {
   children?: MenuItem[];
   /** Permission yang dibutuhkan (salah satu). Kosong = semua pengguna. Induk tampil bila ada anak yang boleh. */
   permission?: Permission;
+  /** Disembunyikan (dan route-nya ditolak) untuk akun wali santri, walau izinnya terpenuhi. */
+  hideForWali?: boolean;
 };

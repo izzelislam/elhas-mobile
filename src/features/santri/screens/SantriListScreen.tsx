@@ -59,7 +59,11 @@ export default function SantriListScreen({
         setTotal(res.meta.total);
         setItems(prev => (target === 1 ? res.data : [...prev, ...res.data]));
         setFailed(false);
-      } catch {
+      } catch (e) {
+        if (__DEV__) {
+          const err = e as {response?: {status?: number; data?: unknown}; message?: string};
+          console.log('[santri] gagal', err.response?.status, err.response?.data ?? err.message);
+        }
         if (id !== requestId.current) {
           return;
         }

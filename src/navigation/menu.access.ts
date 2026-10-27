@@ -1,5 +1,5 @@
 import {AuthUser} from '@/features/auth/types';
-import {hasPermission} from '@/lib/permissions';
+import {hasPermission, isWali} from '@/lib/permissions';
 import {MENU} from './menu.config';
 import {MenuItem} from './menu.types';
 
@@ -7,7 +7,9 @@ import {MenuItem} from './menu.types';
 export function filterMenu(items: MenuItem[], user: AuthUser | null): MenuItem[] {
   return items.flatMap(item => {
     if (!item.children) {
-      return hasPermission(user, item.permission) ? [item] : [];
+      return hasPermission(user, item.permission) && !(item.hideForWali && isWali(user))
+        ? [item]
+        : [];
     }
     const children = filterMenu(item.children, user);
     return children.length ? [{...item, children}] : [];
@@ -15,10 +17,14 @@ export function filterMenu(items: MenuItem[], user: AuthUser | null): MenuItem[]
 }
 
 const routePermission = new Map<string, MenuItem['permission']>();
+const waliBlocked = new Set<string>();
 (function collect(items: MenuItem[]) {
   items.forEach(i => {
     if (i.route) {
       routePermission.set(i.route, i.permission);
+      if (i.hideForWali) {
+        waliBlocked.add(i.route);
+      }
     }
     if (i.children) {
       collect(i.children);
@@ -28,4 +34,5 @@ const routePermission = new Map<string, MenuItem['permission']>();
 
 /** Route di luar menu (Aduan, Informasi, Notifikasi, ...) tidak dibatasi permission. */
 export const canOpenRoute = (route: string, user: AuthUser | null) =>
+  !(waliBlocked.has(route) && isWali(user)) &&
   hasPermission(user, routePermission.get(route));

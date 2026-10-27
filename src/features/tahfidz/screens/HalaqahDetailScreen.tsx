@@ -1,93 +1,75 @@
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {ActivityIndicator, FlatList, Pressable, Text, TextInput, View} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {ArrowLeft, BookOpen, Search, UserRound, Users, X} from 'lucide-react-native';
+import {ArrowLeft, BookOpen, ChevronRight, Search, UserRound, Users, X} from 'lucide-react-native';
+import {Avatar} from '@/components/ui/Avatar';
 import {Button} from '@/components/ui/Button';
+import {Card} from '@/components/ui/Card';
 import {colors} from '@/theme';
 import {toast} from '@/store/toast.store';
-import {getSetoranList} from '../services/setoran.service';
-import {SetoranItem} from '../components/SetoranItem';
-import type {Halaqah, Setoran} from '../types';
+import {getHalaqahDetail} from '../services/halaqah.service';
+import {getRingkasan} from '../services/ringkasan.service';
+import type {Halaqah, HalaqahDetail, RingkasanSantri} from '../types';
 
-const PER_PAGE = 15;
-
+/** Anggota halaqah dari API detail; ringkasan setoran digabung agar santri yang belum setoran tetap tampil. */
 export default function HalaqahDetailScreen({
   halaqah,
   onBack,
+  onSelectSantri,
 }: {
   halaqah: Halaqah;
   onBack: () => void;
+  onSelectSantri: (ringkasan: RingkasanSantri) => void;
 }) {
   const insets = useSafeAreaInsets();
-  const [items, setItems] = useState<Setoran[]>([]);
-  const [total, setTotal] = useState(0);
+  const [detail, setDetail] = useState<HalaqahDetail | null>(null);
+  const [ringkasan, setRingkasan] = useState<Map<number, RingkasanSantri>>(new Map());
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(false);
   const [failed, setFailed] = useState(false);
   const [search, setSearch] = useState('');
-  const page = useRef(1);
-  const lastPage = useRef(1);
-  const busy = useRef(false);
 
-  const load = useCallback(
-    async (target: number) => {
-      if (busy.current) {
-        return;
-      }
-      busy.current = true;
-      try {
-        const res = await getSetoranList({
-          halaqah_id: halaqah.id,
-          per_page: PER_PAGE,
-          page: target,
-        });
-        page.current = res.meta.current_page;
-        lastPage.current = res.meta.last_page;
-        setHasMore(res.meta.current_page < res.meta.last_page);
-        setTotal(res.meta.total);
-        setItems(prev => (target === 1 ? res.data : [...prev, ...res.data]));
-        setFailed(false);
-      } catch {
-        if (target === 1) {
-          setFailed(true);
-        }
-        toast.error('Gagal memuat setoran');
-      } finally {
-        busy.current = false;
-        setLoading(false);
-        setRefreshing(false);
-        setLoadingMore(false);
-      }
-    },
-    [halaqah.id],
-  );
+  const load = useCallback(async () => {
+    try {
+      const [d, r] = await Promise.all([
+        getHalaqahDetail(halaqah.id),
+        // Ringkasan hanya pelengkap: bila gagal, daftar santri tetap ditampilkan.
+        getRingkasan({halaqah_id: halaqah.id}).catch(() => null),
+      ]);
+      setDetail(d);
+      setRingkasan(new Map((r?.per_santri ?? []).map(i => [i.santri_id, i])));
+      setFailed(false);
+    } catch {
+      setFailed(true);
+      toast.error('Gagal memuat data halaqah');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, [halaqah.id]);
 
   useEffect(() => {
-    load(1);
+    load();
   }, [load]);
-
-  const more = () => {
-    if (page.current < lastPage.current && !busy.current) {
-      setLoadingMore(true);
-      load(page.current + 1);
-    }
-  };
 
   const query = search.trim().toLowerCase();
   const visible = useMemo(
     () =>
-      query ? items.filter(i => i.santri?.nama_lengkap.toLowerCase().includes(query)) : items,
-    [items, query],
+      (detail?.santri ?? []).filter(
+        s => !query || s.nama_lengkap.toLowerCase().includes(query),
+      ),
+    [detail, query],
   );
 
-  // API belum punya parameter pencarian: saat mencari, muat sisa halaman agar hasilnya lengkap
-  useEffect(() => {
-    if (query && !loading && !loadingMore) {
-      more();
-    }
-  }, [query, items, loading, loadingMore]); // eslint-disable-line react-hooks/exhaustive-deps
+  const open = (s: HalaqahDetail['santri'][number]) =>
+    onSelectSantri(
+      ringkasan.get(s.id) ?? {
+        santri_id: s.id,
+        jumlah_setoran: 0,
+        terakhir_setoran: null,
+        santri: s,
+      },
+    );
 
   const header = (
     <View
@@ -108,11 +90,11 @@ export default function HalaqahDetailScreen({
           <View className="mt-1 flex-row items-center">
             <UserRound size={13} color={colors.brand.foreground} />
             <Text className="ml-1.5 text-label text-brand-foreground opacity-80">
-              {halaqah.musyrif?.name ?? '-'}
+              {detail?.musyrif?.name ?? halaqah.musyrif?.name ?? '-'}
             </Text>
             <Users size={13} color={colors.brand.foreground} style={{marginLeft: 12}} />
             <Text className="ml-1.5 text-label text-brand-foreground opacity-80">
-              {halaqah.jumlah_santri} santri
+              {detail?.santri.length ?? halaqah.jumlah_santri} santri
             </Text>
           </View>
         </View>
@@ -149,13 +131,13 @@ export default function HalaqahDetailScreen({
       ) : failed ? (
         <View className="flex-1 items-center justify-center px-8">
           <Text className="mb-4 text-center text-body text-ink-muted">
-            Setoran tidak dapat dimuat
+            Data halaqah tidak dapat dimuat
           </Text>
           <Button
             title="Coba lagi"
             onPress={() => {
               setLoading(true);
-              load(1);
+              load();
             }}
           />
         </View>
@@ -163,39 +145,50 @@ export default function HalaqahDetailScreen({
         <FlatList
           data={visible}
           keyExtractor={i => String(i.id)}
-          renderItem={({item}) => <SetoranItem item={item} />}
+          renderItem={({item}) => {
+            const r = ringkasan.get(item.id);
+            return (
+              <Pressable onPress={() => open(item)} className="active:opacity-80">
+                <Card className="mb-3 flex-row items-center border-0 p-4">
+                  <Avatar name={item.nama_lengkap} size={44} />
+                  <View className="ml-3 flex-1">
+                    <Text className="text-body font-semibold text-ink" numberOfLines={1}>
+                      {item.nama_lengkap}
+                    </Text>
+                    <Text className="text-caption text-ink-muted">NIS {item.nis}</Text>
+                  </View>
+                  <Text
+                    className={
+                      r ? 'text-caption font-semibold text-brand' : 'text-caption text-ink-muted'
+                    }>
+                    {r ? `${r.jumlah_setoran} setoran` : 'Belum setoran'}
+                  </Text>
+                  <ChevronRight size={18} color={colors.text.muted} />
+                </Card>
+              </Pressable>
+            );
+          }}
           contentContainerStyle={{padding: 20, paddingBottom: insets.bottom + 20}}
           showsVerticalScrollIndicator={false}
           refreshing={refreshing}
           onRefresh={() => {
             setRefreshing(true);
-            load(1);
+            load();
           }}
-          onEndReached={more}
-          onEndReachedThreshold={0.4}
           ListHeaderComponent={
-            total > 0 ? (
+            visible.length > 0 ? (
               <Text className="mb-2 ml-1 text-caption font-medium tracking-wide text-ink-muted">
-                SETORAN HAFALAN · {total}
+                ANGGOTA HALAQAH · {visible.length}
               </Text>
             ) : undefined
           }
           ListEmptyComponent={
             <View className="mt-10 items-center">
-              <BookOpen size={40} color={colors.text.muted} />
+              <Users size={40} color={colors.text.muted} />
               <Text className="mt-3 text-body text-ink-muted">
-                {query ? 'Santri tidak ditemukan' : 'Belum ada setoran'}
+                {query ? 'Santri tidak ditemukan' : 'Belum ada santri di halaqah ini'}
               </Text>
             </View>
-          }
-          ListFooterComponent={
-            loadingMore ? (
-              <ActivityIndicator className="py-4" color={colors.brand.DEFAULT} />
-            ) : hasMore ? (
-              <Pressable onPress={more} className="items-center py-4 active:opacity-70">
-                <Text className="text-label font-medium text-brand">Muat lebih banyak</Text>
-              </Pressable>
-            ) : undefined
           }
         />
       )}

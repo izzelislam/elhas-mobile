@@ -2,6 +2,8 @@ import {create} from 'zustand';
 import {createJSONStorage, persist} from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type {AuthUser} from '@/features/auth/types';
+import {useDashboardStore} from './dashboard.store';
+import {useScopeStore} from './scope.store';
 
 type AuthState = {
   token: string | null;
@@ -20,7 +22,12 @@ export const useAuthStore = create<AuthState>()(
       setSession: (token, user) => set({token, user}),
       setUser: user => set({user}),
       setToken: token => set({token}),
-      logout: () => set({token: null, user: null}),
+      logout: () => {
+        // Token, user (termasuk role & hak akses) dan scope unit/kelas milik sesi sebelumnya tidak boleh terbawa ke user berikutnya.
+        useScopeStore.getState().reset();
+        useDashboardStore.getState().reset();
+        set({token: null, user: null});
+      },
     }),
     {
       name: 'auth',
@@ -29,3 +36,13 @@ export const useAuthStore = create<AuthState>()(
     },
   ),
 );
+
+// Debug hak akses: tampilkan peran dan permission akun aktif di console setiap kali user berubah.
+if (__DEV__) {
+  useAuthStore.subscribe((state, prev) => {
+    if (state.user && state.user !== prev.user) {
+      const {name, email, roles, permissions} = state.user;
+      console.log('[hak-akses]', {name, email, roles, permissions});
+    }
+  });
+}

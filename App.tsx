@@ -7,6 +7,9 @@ import {CircleUser, CircleHelp, Home, Receipt} from 'lucide-react-native';
 import {DashboardScreen} from '@/features/dashboard/screens';
 import {SetoranDetailScreen} from '@/features/tahfidz/screens';
 import {AkunScreen} from '@/features/akun/screens';
+import {TransaksiScreen} from '@/features/keuangan/screens';
+import {AduanScreen} from '@/features/aduan/screens';
+import {SantriDetailScreen} from '@/features/santri/screens';
 import {
   LoginScreen,
   OnboardingScreen,
@@ -16,6 +19,7 @@ import {getMe} from '@/features/auth/services/auth.service';
 import {ROUTES} from '@/navigation/routes';
 import {canOpenRoute} from '@/navigation/menu.access';
 import {useSetoranDetail} from '@/features/tahfidz/store';
+import {setupPush} from '@/features/notifikasi/services/push.service';
 import {useAuthStore} from '@/store/auth.store';
 import {useAppStore} from '@/store/app.store';
 import {themeVars} from '@/theme';
@@ -54,6 +58,7 @@ function MainApp() {
   const setoranDetail = useSetoranDetail(s => s.selected);
   const closeSetoranDetail = useSetoranDetail(s => s.close);
   const [route, setRoute] = useState<string | null>(null);
+  const [santriId, setSantriId] = useState<number | null>(null);
   const setUser = useAuthStore(s => s.setUser);
   const themeId = useAppStore(s => s.themeId);
   useEffect(() => {
@@ -61,6 +66,15 @@ function MainApp() {
       .then(setUser)
       .catch(() => {}); // 401 ditangani interceptor (logout)
   }, [setUser]);
+  useEffect(() => {
+    const ready = setupPush(r => {
+      setTab('home');
+      setRoute(r);
+    });
+    return () => {
+      ready.then(off => off());
+    };
+  }, []);
   const authUser = useAuthStore(s => s.user);
   // Route tanpa izin jatuh ke dashboard (menu sudah disaring; ini pengaman untuk navigasi lain, mis. dari notifikasi).
   const Screen =
@@ -75,11 +89,17 @@ function MainApp() {
               item={setoranDetail}
               onBack={closeSetoranDetail}
             />
+          ) : santriId !== null ? (
+            <SantriDetailScreen id={santriId} onBack={() => setSantriId(null)} />
           ) : Screen ? (
             <Screen onBack={() => setRoute(null)} navigate={setRoute} />
           ) : (
-            <DashboardScreen onNavigate={setRoute} />
+            <DashboardScreen onNavigate={setRoute} onOpenSantri={setSantriId} />
           )
+        ) : null}
+        {tab === 'transaksi' ? <TransaksiScreen /> : null}
+        {tab === 'bantuan' ? (
+          <AduanScreen onBack={() => setTab('home')} />
         ) : null}
         {tab === 'akun' ? <AkunScreen /> : null}
       </View>

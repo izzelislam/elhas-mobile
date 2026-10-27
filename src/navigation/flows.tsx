@@ -107,8 +107,16 @@ export function SetoranFlow({onBack}: RouteProps) {
 
 export function HalaqahFlow({onBack}: RouteProps) {
   const [halaqah, setHalaqah] = useState<Halaqah | null>(null);
+  const [santri, setSantri] = useState<RingkasanSantri | null>(null);
+  if (santri) {
+    return <RingkasanDetailScreen ringkasan={santri} onBack={() => setSantri(null)} />;
+  }
   return halaqah ? (
-    <HalaqahDetailScreen halaqah={halaqah} onBack={() => setHalaqah(null)} />
+    <HalaqahDetailScreen
+      halaqah={halaqah}
+      onBack={() => setHalaqah(null)}
+      onSelectSantri={setSantri}
+    />
   ) : (
     <HalaqahScreen onBack={onBack} onSelect={setHalaqah} />
   );
