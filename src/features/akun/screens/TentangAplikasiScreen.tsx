@@ -6,7 +6,7 @@ import {Card} from '@/components/ui/Card';
 import {Logo} from '@/components/ui/Logo';
 import {toast} from '@/store/toast.store';
 import {colors} from '@/theme';
-import {version as APP_VERSION} from '../../../../package.json';
+import {APP_VERSION} from '@/lib/version';
 
 const DEVELOPER_EMAIL = 'bangfkr002@gmail.com';
 

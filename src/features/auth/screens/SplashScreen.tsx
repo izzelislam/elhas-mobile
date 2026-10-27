@@ -1,6 +1,7 @@
 import React, {useEffect, useRef} from 'react';
 import {Animated, Text, View} from 'react-native';
 import {Logo} from '@/components/ui/Logo';
+import {APP_VERSION} from '@/lib/version';
 
 const DURATION_MS = 1800;
 
@@ -30,7 +31,7 @@ export default function SplashScreen({onFinish}: {onFinish: () => void}) {
         </Text>
       </Animated.View>
       <Text className="absolute bottom-10 text-caption text-brand-foreground opacity-60">
-        v0.0.1
+        v{APP_VERSION}
       </Text>
     </View>
   );

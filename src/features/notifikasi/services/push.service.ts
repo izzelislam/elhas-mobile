@@ -16,7 +16,7 @@ import {
 } from '@react-native-firebase/messaging';
 import {http} from '@/services/api/client';
 import {toast} from '@/store/toast.store';
-import {version as APP_VERSION} from '../../../../package.json';
+import {APP_VERSION} from '@/lib/version';
 
 /** Endpoint backend penyimpan token perangkat (FCM). */
 const DEVICE_TOKEN_PATH = '/notifications/device';

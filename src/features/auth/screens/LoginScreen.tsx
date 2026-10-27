@@ -5,6 +5,7 @@ import {Lock, Mail} from 'lucide-react-native';
 import {Card} from '@/components/ui/Card';
 import {Button} from '@/components/ui/Button';
 import {Logo} from '@/components/ui/Logo';
+import {APP_VERSION} from '@/lib/version';
 import {TextField} from '@/components/ui/TextField';
 import {useAuthStore} from '@/store/auth.store';
 import {toast} from '@/store/toast.store';
@@ -115,7 +116,7 @@ export default function LoginScreen() {
           <Text className="text-caption text-ink-muted">
             Butuh bantuan? Hubungi admin sekolah
           </Text>
-          <Text className="mt-1 text-caption text-ink-muted">elhamobile v0.0.1</Text>
+          <Text className="mt-1 text-caption text-ink-muted">elhamobile v{APP_VERSION}</Text>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>

@@ -13,6 +13,7 @@ import {Card} from '@/components/ui/Card';
 import {Avatar} from '@/components/ui/Avatar';
 import {dialog} from '@/store/dialog.store';
 import {useIsWali} from '@/lib/permissions';
+import {APP_VERSION} from '@/lib/version';
 import {useAuthStore} from '@/store/auth.store';
 import {logoutRequest} from '@/features/auth/services/auth.service';
 import {teardownPush} from '@/features/notifikasi/services/push.service';
@@ -138,7 +139,7 @@ export default function AkunScreen() {
           />
         </Card>
         <Text className="mt-5 text-center text-caption text-ink-muted">
-          elhamobile v0.0.1
+          elhamobile v{APP_VERSION}
         </Text>
       </View>
     </ScrollView>
