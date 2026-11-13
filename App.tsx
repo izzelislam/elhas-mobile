@@ -25,6 +25,7 @@ import {setupPush} from '@/features/notifikasi/services/push.service';
 import {useAuthStore} from '@/store/auth.store';
 import {useAppStore} from '@/store/app.store';
 import {themeVars} from '@/theme';
+import {useInAppUpdate} from '@/hooks/useInAppUpdate';
 
 function useHydrated() {
   const [done, setDone] = useState(
@@ -144,6 +145,7 @@ function App() {
   const ready = splashDone && hydrated;
   const themeId = useAppStore(s => s.themeId);
   const onSplashFinish = useCallback(() => setSplashDone(true), []);
+  useInAppUpdate();
 
   return (
     <SafeAreaProvider>
