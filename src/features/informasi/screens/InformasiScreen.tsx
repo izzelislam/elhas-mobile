@@ -18,6 +18,7 @@ import {
   KategoriInformasi,
   getInformasiList,
   getKategoriInformasi,
+  informasiImageUrl,
 } from '../services/informasi.service';
 import {InformasiImage} from '../components/InformasiImage';
 import InformasiDetailScreen from './InformasiDetailScreen';
@@ -225,7 +226,7 @@ export default function InformasiScreen({onBack}: {onBack: () => void}) {
             >
               <Card className="mb-3 overflow-hidden border-0 p-0">
                 <InformasiImage
-                  uri={item.gambar ?? item.thumbnail}
+                  uri={informasiImageUrl(item)}
                   className="h-36 w-full"
                 />
                 <View className="p-4">

@@ -25,7 +25,10 @@ import {MenuTile} from '@/components/ui/MenuTile';
 import {colors} from '@/theme';
 import {MENU_VISUAL} from '../menuVisual';
 import {SubMenuSheet} from '../components/SubMenuSheet';
-import {getInformasiList} from '@/features/informasi/services/informasi.service';
+import {
+  getInformasiList,
+  informasiImageUrl,
+} from '@/features/informasi/services/informasi.service';
 import {InformasiImage} from '@/features/informasi/components/InformasiImage';
 import {refreshDevice} from '@/features/notifikasi/services/push.service';
 import {getUnreadCount} from '@/features/notifikasi/services/notifikasi.service';
@@ -217,7 +220,7 @@ export default function DashboardScreen({
                 className="w-64 overflow-hidden rounded-card bg-brand-light active:opacity-80"
               >
                 <InformasiImage
-                  uri={i.gambar ?? i.thumbnail}
+                  uri={informasiImageUrl(i)}
                   className="h-28 w-full"
                 />
                 <View className="p-4">

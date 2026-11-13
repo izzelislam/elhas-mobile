@@ -83,7 +83,11 @@ export function RekapFilterSheet({visible, value, onClose, onApply, showSantri =
   };
 
   return (
-    <BottomSheet visible={visible} title={TITLES[page]} onClose={onClose}>
+    <BottomSheet
+      visible={visible}
+      title={TITLES[page]}
+      onClose={onClose}
+      onBack={page !== 'main' ? () => setPage('main') : undefined}>
       {page !== 'main' ? (
         <Pressable
           onPress={() => setPage('main')}

@@ -83,15 +83,17 @@ type Row = {status: AbsensiStatus; keterangan: string};
 export default function AbsensiFormScreen({
   onBack,
   onSaved,
+  initialKelasId,
 }: {
   onBack: () => void;
   onSaved: () => void;
+  initialKelasId?: number | null;
 }) {
   const insets = useSafeAreaInsets();
   const [kelasList, setKelasList] = useState<Kelas[]>(
     getCachedReferensi()?.kelas ?? [],
   );
-  const [kelasId, setKelasId] = useState<number | null>(null);
+  const [kelasId, setKelasId] = useState<number | null>(initialKelasId ?? null);
   const [tanggal, setTanggal] = useState(todayKey());
   const [jadwalId, setJadwalId] = useState<number | null>(null);
   const [jadwal, setJadwal] = useState<JadwalPelajaran[]>([]);

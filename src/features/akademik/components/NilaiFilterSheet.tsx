@@ -138,7 +138,7 @@ export function NilaiFilterSheet({visible, value, onClose, onApply}: Props) {
       visible={visible}
       title={page === 'santri' ? 'Pilih Santri' : 'Filter'}
       onClose={onClose}
-    >
+      onBack={page === 'santri' ? () => setPage('main') : undefined}>
       {page === 'santri' ? (
         <>
           <Pressable

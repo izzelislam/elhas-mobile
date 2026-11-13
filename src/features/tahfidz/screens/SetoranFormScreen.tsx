@@ -70,12 +70,14 @@ const inputClass = (error?: string) =>
 export default function SetoranFormScreen({
   onBack,
   onSaved,
+  initialSantri,
 }: {
   onBack: () => void;
   onSaved: () => void;
+  initialSantri?: {id: number; nama: string} | null;
 }) {
   const insets = useSafeAreaInsets();
-  const [santri, setSantri] = useState<{id: number; nama: string} | null>(null);
+  const [santri, setSantri] = useState<{id: number; nama: string} | null>(initialSantri ?? null);
   const [jenis, setJenis] = useState<string>('setoran_baru');
   const [surahMulai, setSurahMulai] = useState<number>(1);
   const [ayatMulai, setAyatMulai] = useState('1');

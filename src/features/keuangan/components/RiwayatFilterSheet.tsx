@@ -66,7 +66,11 @@ export function RiwayatFilterSheet({visible, value, onClose, onApply, showSantri
   const rangeInvalid = !!draft.mulai && !!draft.selesai && draft.mulai > draft.selesai;
 
   return (
-    <BottomSheet visible={visible} title={TITLE[step]} onClose={onClose}>
+    <BottomSheet
+      visible={visible}
+      title={TITLE[step]}
+      onClose={onClose}
+      onBack={step !== 'main' ? () => setStep('main') : undefined}>
       {step === 'santri' ? (
         <>
           {back}

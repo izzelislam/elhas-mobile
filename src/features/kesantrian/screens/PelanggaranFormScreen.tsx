@@ -26,6 +26,7 @@ import {
 type Props = {
   onBack: () => void;
   onSaved: () => void;
+  initialSantri?: {id: number; nama: string} | null;
 };
 
 const KATEGORI: Record<string, {label: string; color: string; order: number}> = {
@@ -70,9 +71,9 @@ function errorMessage(err: unknown) {
   return 'Terjadi kesalahan, coba lagi';
 }
 
-export default function PelanggaranFormScreen({onBack, onSaved}: Props) {
+export default function PelanggaranFormScreen({onBack, onSaved, initialSantri}: Props) {
   const insets = useSafeAreaInsets();
-  const [santri, setSantri] = useState<{id: number; nama: string} | null>(null);
+  const [santri, setSantri] = useState<{id: number; nama: string} | null>(initialSantri ?? null);
   const [jenisList, setJenisList] = useState<JenisPelanggaran[]>([]);
   const [jenisLoading, setJenisLoading] = useState(true);
   const [jenisId, setJenisId] = useState<number | null>(null);

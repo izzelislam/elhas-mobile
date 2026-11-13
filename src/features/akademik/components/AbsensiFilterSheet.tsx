@@ -87,7 +87,11 @@ export function AbsensiFilterSheet({visible, value, onClose, onApply}: Props) {
       : 'Pilih Tanggal';
 
   return (
-    <BottomSheet visible={visible} title={title} onClose={onClose}>
+    <BottomSheet
+      visible={visible}
+      title={title}
+      onClose={onClose}
+      onBack={page !== 'main' ? () => setPage('main') : undefined}>
       {page !== 'main' ? (
         <Pressable
           onPress={() => setPage('main')}

@@ -58,7 +58,7 @@ export function TagihanFilterSheet({visible, value, onClose, onApply}: Props) {
   );
 
   return (
-    <BottomSheet visible={visible} title={pickSantri ? 'Pilih Santri' : 'Filter'} onClose={onClose}>
+    <BottomSheet visible={visible} title={pickSantri ? 'Pilih Santri' : 'Filter'} onClose={onClose} onBack={pickSantri ? () => setPickSantri(false) : undefined}>
       {pickSantri ? (
         <>
           <Pressable

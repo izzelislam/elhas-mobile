@@ -58,9 +58,11 @@ export default function MutabaahSantriFormScreen({
   onBack,
   onSaved,
   variant = 'santri',
+  initialSantri,
 }: {
   onBack: () => void;
   onSaved: () => void;
+  initialSantri?: {id: number; nama: string} | null;
   variant?: MutabaahVariant;
 }) {
   const isSantri = variant === 'santri';
@@ -69,7 +71,7 @@ export default function MutabaahSantriFormScreen({
   const [items, setItems] = useState<Record<number, ItemState>>({});
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
-  const [santri, setSantri] = useState<{id: number; nama: string} | null>(null);
+  const [santri, setSantri] = useState<{id: number; nama: string} | null>(initialSantri ?? null);
   const [tanggal, setTanggal] = useState(todayKey());
   const [santriError, setSantriError] = useState('');
   const [sheet, setSheet] = useState<'santri' | 'tanggal' | null>(null);

@@ -20,3 +20,19 @@ export async function getSantriDetail(id: number) {
   const {data} = await http.get<SantriDetailResponse>(`/santri/${id}`);
   return data.data;
 }
+
+export type SantriRingkas = {
+  id: number;
+  nis: string;
+  nisn: string | null;
+  nama_lengkap: string;
+  foto_url: string | null;
+  status: {value: string; label: string} | null;
+  kelas_aktif: {id: number; nama: string} | null;
+};
+
+/** Cari satu santri dari NIS (isi QR kartu santri). Melempar error 404 bila tidak ada. */
+export async function searchSantriByNis(nis: string) {
+  const {data} = await http.get<{data: SantriRingkas}>('/santri/search', {params: {nis}});
+  return data.data;
+}

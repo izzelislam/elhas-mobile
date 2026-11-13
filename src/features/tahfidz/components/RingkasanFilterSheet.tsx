@@ -59,7 +59,11 @@ export function RingkasanFilterSheet({visible, value, halaqahOptions, onClose, o
   };
 
   return (
-    <BottomSheet visible={visible} title={title} onClose={onClose}>
+    <BottomSheet
+      visible={visible}
+      title={title}
+      onClose={onClose}
+      onBack={page !== 'main' ? () => setPage('main') : undefined}>
       {page !== 'main' ? (
         <Pressable
           onPress={() => setPage('main')}

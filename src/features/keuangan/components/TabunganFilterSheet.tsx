@@ -33,7 +33,7 @@ export function TabunganFilterSheet({visible, value, onClose, onApply}: Props) {
   }, [visible, value]);
 
   return (
-    <BottomSheet visible={visible} title={pickSantri ? 'Pilih Santri' : 'Filter'} onClose={onClose}>
+    <BottomSheet visible={visible} title={pickSantri ? 'Pilih Santri' : 'Filter'} onClose={onClose} onBack={pickSantri ? () => setPickSantri(false) : undefined}>
       {pickSantri ? (
         <>
           <Pressable

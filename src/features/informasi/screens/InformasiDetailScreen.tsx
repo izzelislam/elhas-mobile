@@ -10,7 +10,7 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {ArrowLeft} from 'lucide-react-native';
 import {colors} from '@/theme';
 import {InformasiImage} from '../components/InformasiImage';
-import {Informasi, getInformasiDetail} from '../services/informasi.service';
+import {Informasi, getInformasiDetail, informasiImageUrl} from '../services/informasi.service';
 import {formatTanggal} from './InformasiScreen';
 
 export default function InformasiDetailScreen({
@@ -31,7 +31,7 @@ export default function InformasiDetailScreen({
       .finally(() => setLoading(false));
   }, [informasi.id]);
 
-  const image = item.gambar ?? item.thumbnail;
+  const image = informasiImageUrl(item);
 
   return (
     <View className="flex-1 bg-canvas">

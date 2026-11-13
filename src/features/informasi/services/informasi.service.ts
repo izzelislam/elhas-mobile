@@ -17,6 +17,9 @@ export type Informasi = {
   ringkasan: string | null;
   thumbnail: string | null;
   gambar: string | null;
+  /** URL bertanda tangan (kedaluwarsa); `thumbnail`/`gambar` hanya path penyimpanan. */
+  thumbnail_url?: string | null;
+  gambar_url?: string | null;
   status: 'published' | 'draft' | 'archived';
   views: number;
   tanggal_publish: string | null;
@@ -52,3 +55,7 @@ export async function getInformasiDetail(id: number) {
   const {data} = await http.get<{data: Informasi}>(`/informasi/${id}`);
   return data.data;
 }
+
+/** URL gambar yang bisa dimuat langsung; path relatif sengaja diabaikan. */
+export const informasiImageUrl = (i: Pick<Informasi, 'gambar_url' | 'thumbnail_url'>) =>
+  i.gambar_url ?? i.thumbnail_url ?? null;

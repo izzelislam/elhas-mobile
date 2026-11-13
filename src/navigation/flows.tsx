@@ -31,6 +31,7 @@ import type {RekapParams} from '@/features/mutabaah/services/mutabaah.service';
 import type {Halaqah, RingkasanSantri} from '@/features/tahfidz/types';
 import type {Pelanggaran, Prestasi} from '@/features/kesantrian/types';
 import type {RouteProps} from './types';
+import {useBackHandler} from './useBackHandler';
 
 /*
  * Route yang punya layar turunan (detail/form). State turunannya dipegang di sini,
@@ -39,6 +40,7 @@ import type {RouteProps} from './types';
 
 export function SantriFlow({onBack}: RouteProps) {
   const [id, setId] = useState<number | null>(null);
+  useBackHandler(() => setId(null), id !== null);
   return id !== null ? (
     <SantriDetailScreen id={id} onBack={() => setId(null)} />
   ) : (
@@ -55,6 +57,7 @@ export function MutabaahFlow({
     santri: RekapSantri;
     params: Omit<RekapParams, 'santri_id'>;
   } | null>(null);
+  useBackHandler(() => (form ? setForm(false) : setDetail(null)), form || detail !== null);
   if (form) {
     return (
       <MutabaahSantriFormScreen
@@ -86,6 +89,7 @@ export function MutabaahFlow({
 
 export function RingkasanFlow({onBack}: RouteProps) {
   const [santri, setSantri] = useState<RingkasanSantri | null>(null);
+  useBackHandler(() => setSantri(null), santri !== null);
   return santri ? (
     <RingkasanDetailScreen ringkasan={santri} onBack={() => setSantri(null)} />
   ) : (
@@ -95,6 +99,7 @@ export function RingkasanFlow({onBack}: RouteProps) {
 
 export function SetoranFlow({onBack}: RouteProps) {
   const [form, setForm] = useState(false);
+  useBackHandler(() => setForm(false), form);
   return form ? (
     <SetoranFormScreen
       onBack={() => setForm(false)}
@@ -108,6 +113,7 @@ export function SetoranFlow({onBack}: RouteProps) {
 export function HalaqahFlow({onBack}: RouteProps) {
   const [halaqah, setHalaqah] = useState<Halaqah | null>(null);
   const [santri, setSantri] = useState<RingkasanSantri | null>(null);
+  useBackHandler(() => (santri ? setSantri(null) : setHalaqah(null)), santri !== null || halaqah !== null);
   if (santri) {
     return <RingkasanDetailScreen ringkasan={santri} onBack={() => setSantri(null)} />;
   }
@@ -134,6 +140,7 @@ export function AsramaGedungFlow({onBack}: RouteProps) {
 
 export function IzinFlow({onBack}: RouteProps) {
   const [form, setForm] = useState(false);
+  useBackHandler(() => setForm(false), form);
   return form ? (
     <IzinFormScreen onBack={() => setForm(false)} onSaved={() => setForm(false)} />
   ) : (
@@ -143,6 +150,7 @@ export function IzinFlow({onBack}: RouteProps) {
 
 export function PrestasiFlow({onBack}: RouteProps) {
   const [item, setItem] = useState<Prestasi | null>(null);
+  useBackHandler(() => setItem(null), item !== null);
   return item ? (
     <PrestasiDetailScreen initial={item} onBack={() => setItem(null)} />
   ) : (
@@ -153,6 +161,7 @@ export function PrestasiFlow({onBack}: RouteProps) {
 export function PelanggaranFlow({onBack}: RouteProps) {
   const [form, setForm] = useState(false);
   const [item, setItem] = useState<Pelanggaran | null>(null);
+  useBackHandler(() => (form ? setForm(false) : setItem(null)), form || item !== null);
   if (form) {
     return (
       <PelanggaranFormScreen

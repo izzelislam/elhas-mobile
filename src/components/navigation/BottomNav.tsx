@@ -4,7 +4,7 @@ import type {LucideIcon} from 'lucide-react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {colors} from '@/theme';
 
-export type NavItem = {key: string; label: string; icon: LucideIcon};
+export type NavItem = {key: string; label: string; icon: LucideIcon; /** Tombol aksi menonjol di tengah; tidak jadi tab aktif. */ action?: boolean};
 
 type Props = {
   items: NavItem[];
@@ -18,7 +18,21 @@ export function BottomNav({items, active, onChange}: Props) {
     <View
       style={{paddingBottom: Math.max(insets.bottom, 8)}}
       className="flex-row rounded-t-card bg-brand pt-2">
-      {items.map(({key, label, icon: Icon}) => {
+      {items.map(({key, label, icon: Icon, action}) => {
+        if (action) {
+          return (
+            <Pressable
+              key={key}
+              onPress={() => onChange(key)}
+              accessibilityLabel={label}
+              className="flex-1 items-center">
+              <View className="-mt-7 h-14 w-14 items-center justify-center rounded-full border-4 border-surface bg-brand-dark">
+                <Icon size={26} color={colors.brand.foreground} strokeWidth={2.2} />
+              </View>
+              <Text className="mt-0.5 text-caption text-brand-foreground">{label}</Text>
+            </Pressable>
+          );
+        }
         const on = key === active;
         return (
           <Pressable

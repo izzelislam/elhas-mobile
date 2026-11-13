@@ -3,13 +3,14 @@ import {useCallback, useEffect, useState} from 'react';
 import {StatusBar, View} from 'react-native';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {PortalHost} from '@rn-primitives/portal';
-import {CircleUser, CircleHelp, Home, Receipt} from 'lucide-react-native';
+import {CircleUser, CircleHelp, Home, Receipt, ScanLine} from 'lucide-react-native';
 import {DashboardScreen} from '@/features/dashboard/screens';
 import {SetoranDetailScreen} from '@/features/tahfidz/screens';
 import {AkunScreen} from '@/features/akun/screens';
 import {TransaksiScreen} from '@/features/keuangan/screens';
 import {AduanScreen} from '@/features/aduan/screens';
-import {SantriDetailScreen} from '@/features/santri/screens';
+import {SantriDetailScreen, ScanSantriScreen} from '@/features/santri/screens';
+import {isWali} from '@/lib/permissions';
 import {
   LoginScreen,
   OnboardingScreen,
@@ -18,6 +19,7 @@ import {
 import {getMe} from '@/features/auth/services/auth.service';
 import {ROUTES} from '@/navigation/routes';
 import {canOpenRoute} from '@/navigation/menu.access';
+import {useBackHandler} from '@/navigation/useBackHandler';
 import {useSetoranDetail} from '@/features/tahfidz/store';
 import {setupPush} from '@/features/notifikasi/services/push.service';
 import {useAuthStore} from '@/store/auth.store';
@@ -59,6 +61,7 @@ function MainApp() {
   const closeSetoranDetail = useSetoranDetail(s => s.close);
   const [route, setRoute] = useState<string | null>(null);
   const [santriId, setSantriId] = useState<number | null>(null);
+  const [scan, setScan] = useState(false);
   const setUser = useAuthStore(s => s.setUser);
   const themeId = useAppStore(s => s.themeId);
   useEffect(() => {
@@ -76,14 +79,35 @@ function MainApp() {
     };
   }, []);
   const authUser = useAuthStore(s => s.user);
+  // Back device: tutup layar paling dalam dulu; di beranda polos baru keluar app.
+  useBackHandler(() => {
+    if (scan) {
+      setScan(false);
+    } else if (setoranDetail) {
+      closeSetoranDetail();
+    } else if (santriId !== null) {
+      setSantriId(null);
+    } else if (route) {
+      setRoute(null);
+    } else if (tab !== 'home') {
+      setTab('home');
+    } else {
+      return false;
+    }
+  });
   // Route tanpa izin jatuh ke dashboard (menu sudah disaring; ini pengaman untuk navigasi lain, mis. dari notifikasi).
   const Screen =
     route && canOpenRoute(route, authUser) ? ROUTES[route] : undefined;
+  // Non-wali mendapat tombol scan kartu santri di tengah bottom nav.
+  const nav = isWali(authUser)
+    ? NAV
+    : [...NAV.slice(0, 2), {key: 'scan', label: 'Scan', icon: ScanLine, action: true}, ...NAV.slice(2)];
   return (
     // key = tema: tombol/ikon yang membaca warna lewat JS ikut tergambar ulang saat tema berganti
     <View key={themeId} className="flex-1 bg-surface">
       <View className="flex-1">
-        {tab === 'home' ? (
+        {scan ? <ScanSantriScreen onClose={() => setScan(false)} /> : null}
+        {!scan && tab === 'home' ? (
           setoranDetail ? (
             <SetoranDetailScreen
               item={setoranDetail}
@@ -97,13 +121,17 @@ function MainApp() {
             <DashboardScreen onNavigate={setRoute} onOpenSantri={setSantriId} />
           )
         ) : null}
-        {tab === 'transaksi' ? <TransaksiScreen /> : null}
-        {tab === 'bantuan' ? (
+        {!scan && tab === 'transaksi' ? <TransaksiScreen /> : null}
+        {!scan && tab === 'bantuan' ? (
           <AduanScreen onBack={() => setTab('home')} />
         ) : null}
-        {tab === 'akun' ? <AkunScreen /> : null}
+        {!scan && tab === 'akun' ? <AkunScreen /> : null}
       </View>
-      <BottomNav items={NAV} active={tab} onChange={setTab} />
+      <BottomNav
+        items={nav}
+        active={scan ? 'scan' : tab}
+        onChange={k => (k === 'scan' ? setScan(true) : (setScan(false), setTab(k)))}
+      />
     </View>
   );
 }

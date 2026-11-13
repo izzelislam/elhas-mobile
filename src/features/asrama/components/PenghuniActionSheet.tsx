@@ -179,7 +179,8 @@ export function PenghuniActionSheet({penghuni, kamar, onClose, onDone}: Props) {
           ? 'Keluar Asrama'
           : 'Pilih Tanggal'
       }
-      onClose={onClose}>
+      onClose={onClose}
+      onBack={page === 'menu' ? undefined : () => setPage(page === 'tanggal' ? from : 'menu')}>
       {page === 'menu' ? (
         <View className="pb-2">
           <Pressable
